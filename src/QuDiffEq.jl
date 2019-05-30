@@ -1,7 +1,7 @@
 module QuDiffEq
 
 using Yao
-#using QuAlgorithmZoo
+using QuAlgorithmZoo
 using YaoBlocks
 using DiffEqBase
 using BitBasis
