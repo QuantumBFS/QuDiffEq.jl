@@ -5,11 +5,19 @@ abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 #abstract type QuODEProblem{uType,tType,isinplace} <: DiffEqBase.AbstractODEProblem{uType,tType,isinplace} end
 abstract type LDEMSAlgHHL <: QuODEAlgorithm end
 
+"""
+Linear differential equation solvers (non-HHL)
 
-#Linear differential equation solvers (non-HHL)
+ref : arxiv.org/abs/1807.04553
+"""
+
 struct QuLDE <: QuODEAlgorithm end
 
-#Linear differential equation solvers based on HHL
+"""
+Linear differential equation solvers using HHL
+
+ref : arxiv.org/abs/1010.2745v2
+"""
 struct QuEuler{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
