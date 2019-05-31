@@ -24,7 +24,7 @@ export array_qudiff, prepare_init_state, LDEMSAlgHHL, bval, aval
     * β - coefficent for xₙ'
 """
 
-function bval(alg::LDEMSAlgHHL,t,h,g::Function)
+function bval(g::Function,alg::LDEMSAlgHHL,t,h)
     b = zero(g(1))
     for i in 1:(alg.step)
         b += alg.β[i]*g(t-(i-1)*h)
@@ -32,7 +32,7 @@ function bval(alg::LDEMSAlgHHL,t,h,g::Function)
     return b
 end
 
-function aval(alg::LDEMSAlgHHL,t,h,g::Function)
+function aval(g::Function,alg::LDEMSAlgHHL,t,h)
     sz, = size(g(1))
     A = Array{ComplexF64}(undef,sz,(alg.step + 1)*sz)
     i_mat = Matrix{Float64}(I, size(g(1)))
@@ -43,7 +43,7 @@ function aval(alg::LDEMSAlgHHL,t,h,g::Function)
     return A
 end
 
-function prepare_init_state(tspan::NTuple{2, Float64},x::Vector,h::Float64,g::Function,alg::LDEMSAlgHHL)
+function prepare_init_state(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},x::Vector,h::Float64)
     N_t = round(Int, (tspan[2] - tspan[1])/h + 1) #number of time steps
     N = nextpow(2,2*N_t + 1) # To ensure we have a power of 2 dimension for matrix
     sz, = size(g(1))
@@ -51,13 +51,13 @@ function prepare_init_state(tspan::NTuple{2, Float64},x::Vector,h::Float64,g::Fu
     #inital value
     init_state[1:sz] = x
     for i in 2:N_t
-        b = bval(alg,h*(i - 1) + tspan[1],h,g)
+        b = bval(g,alg,h*(i - 1) + tspan[1],h)
         init_state[Int(sz*(i - 1) + 1):Int(sz*(i))] = h*b
     end
     return init_state
 end
 
-function array_qudiff(tspan::NTuple{2, Float64},h::Float64,g::Function,alg::LDEMSAlgHHL)
+function array_qudiff(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},h::Float64)
     sz, = size(g(1))
     i_mat = Matrix{Float64}(I, size(g(1)))
     N_t = round(Int, (tspan[2] - tspan[1])/h + 1) #number of time steps
@@ -69,10 +69,10 @@ function array_qudiff(tspan::NTuple{2, Float64},h::Float64,g::Function,alg::LDEM
     @inbounds A_[sz + 1:2*sz,sz+1:sz*2] = i_mat
     #Generates additional rows based on k - step
     for i in 3:alg.step
-        @inbounds A_[sz*(i - 1) + 1:sz*i, sz*(i - 3) + 1:sz*i] = aval(QuAB2(),(i-2)*h + tspan[1],h,g)
+        @inbounds A_[sz*(i - 1) + 1:sz*i, sz*(i - 3) + 1:sz*i] = aval(g,QuAB2(),(i-2)*h + tspan[1],h)
     end
     for i in alg.step + 1:N_t
-        @inbounds A_[sz*(i - 1) + 1:sz*(i), sz*(i - alg.step - 1) + 1:sz*i] = aval(alg,(i - 2)*h + tspan[1],h,g)
+        @inbounds A_[sz*(i - 1) + 1:sz*(i), sz*(i - alg.step - 1) + 1:sz*i] = aval(g,alg,(i - 2)*h + tspan[1],h)
     end
     #Generates half mirroring matrix
     for i in N_t + 1:N
@@ -89,8 +89,8 @@ function DiffEqBase.solve(prob::QuLDEProblem{F,C,U,T}, alg::LDEMSAlgHHL, dt = (p
     tspan = prob.tspan
     x = prob.u0
 
-    mat = array_qudiff(tspan, dt, A, alg)
-    state = prepare_init_state(tspan, x, dt, b, alg)
+    mat = array_qudiff(A, alg, tspan, dt)
+    state = prepare_init_state(b, alg, tspan, x, dt)
     λ = maximum(eigvals(mat))
     C_value = minimum(eigvals(mat) .|> abs)*0.01;
     mat = 1/(λ*2)*mat
