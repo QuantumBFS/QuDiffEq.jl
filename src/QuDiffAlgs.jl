@@ -2,7 +2,7 @@ export QuLDE, LDEMSAlgHHL
 export QuEuler, QuLeapfrog, QuAB2, QuAB3, QuAB4
 
 abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
-#abstract type QuODEProblem{uType,tType,isinplace} <: DiffEqBase.AbstractODEProblem{uType,tType,isinplace} end
+
 abstract type LDEMSAlgHHL <: QuODEAlgorithm end
 
 """

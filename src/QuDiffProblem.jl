@@ -1,5 +1,5 @@
 export QuLDEProblem
-
+#abstract type QuODEProblem{uType,tType,isinplace} <: DiffEqBase.AbstractODEProblem{uType,tType,isinplace} end
 struct QuLDEProblem{F,C,U,T} #<: QuODEProblem{uType,tType,isinplace}
     A::F
     b::C

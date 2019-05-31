@@ -1,18 +1,17 @@
-import LinearAlgebra.qr, LinearAlgebra.I
 
-struct QuLDEParam{W,L}
+struct QuLDEParam{W,L,Q}
     k::Int
     t::L
     C_tilda::W
     D_tilda::W
     N::W
-    V::GeneralMatrixBlock
-    VS1::GeneralMatrixBlock
-    VS2::GeneralMatrixBlock
-    WS1::GeneralMatrixBlock
-    WS2::GeneralMatrixBlock
+    V::GeneralMatrixBlock{1}
+    VS1::GeneralMatrixBlock{Q}
+    VS2::GeneralMatrixBlock{Q}
+    WS1::GeneralMatrixBlock{Q}
+    WS2::GeneralMatrixBlock{Q}
 
-    function QuLDEParam(k::Int,t::L) where {W,L}
+    function QuLDEParam(k::Int,t::L) where {L}
         C(m) = (t)^(m)/factorial(m)
 
         C_tilda = 0
@@ -42,8 +41,8 @@ struct QuLDEParam{W,L}
         VS2 = matblock(VS2)
         WS1 = matblock(WS1)
         WS2 = matblock(WS2)
-
-        new{ComplexF64,L}(k,t,C_tilda,D_tilda,N,V,VS1,VS2,WS1,WS2)
+        n = Int(log2(k+1))
+        new{ComplexF64,L,n}(k,t,C_tilda,D_tilda,N,V,VS1,VS2,WS1,WS2)
     end
 
 end

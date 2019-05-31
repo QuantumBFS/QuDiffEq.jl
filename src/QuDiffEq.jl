@@ -1,10 +1,10 @@
 module QuDiffEq
 
 using Yao
-using QuAlgorithmZoo
 using YaoBlocks
 using DiffEqBase
 using BitBasis
+using LinearAlgebra
 
 include("QuDiffProblem.jl")
 include("QuDiffAlgs.jl")
