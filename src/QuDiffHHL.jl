@@ -1,5 +1,6 @@
-export array_qudiff, prepare_init_state, LDEMSAlgHHL, bval, aval
-
+export array_qudiff, prepare_init_state, bval, aval
+import QuAlgorithmZoo.hhlsolve
+import LinearAlgebra.eigvals
 """
     Based on : arxiv.org/abs/1010.2745v2
 
@@ -51,7 +52,7 @@ function prepare_init_state(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float6
     #inital value
     init_state[1:sz] = x
     for i in 2:N_t
-        b = bval(g,alg,h*(i - 1) + tspan[1],h)
+        b = bval(alg,h*(i - 1) + tspan[1],h) do t g(t) end
         init_state[Int(sz*(i - 1) + 1):Int(sz*(i))] = h*b
     end
     return init_state
@@ -69,10 +70,10 @@ function array_qudiff(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},h::
     @inbounds A_[sz + 1:2*sz,sz+1:sz*2] = i_mat
     #Generates additional rows based on k - step
     for i in 3:alg.step
-        @inbounds A_[sz*(i - 1) + 1:sz*i, sz*(i - 3) + 1:sz*i] = aval(g,QuAB2(),(i-2)*h + tspan[1],h)
+        @inbounds A_[sz*(i - 1) + 1:sz*i, sz*(i - 3) + 1:sz*i] = aval(QuAB2(),(i-2)*h + tspan[1],h) do t g(t) end
     end
     for i in alg.step + 1:N_t
-        @inbounds A_[sz*(i - 1) + 1:sz*(i), sz*(i - alg.step - 1) + 1:sz*i] = aval(g,alg,(i - 2)*h + tspan[1],h)
+        @inbounds A_[sz*(i - 1) + 1:sz*(i), sz*(i - alg.step - 1) + 1:sz*i] = aval(alg,(i - 2)*h + tspan[1],h) do t g(t) end
     end
     #Generates half mirroring matrix
     for i in N_t + 1:N
@@ -89,13 +90,13 @@ function DiffEqBase.solve(prob::QuLDEProblem{F,C,U,T}, alg::LDEMSAlgHHL, dt = (p
     tspan = prob.tspan
     x = prob.u0
 
-    mat = array_qudiff(A, alg, tspan, dt)
-    state = prepare_init_state(b, alg, tspan, x, dt)
-    λ = maximum(eigvals(mat))
-    C_value = minimum(eigvals(mat) .|> abs)*0.01;
-    mat = 1/(λ*2)*mat
-    state = state*1/(2*λ) |> normalize!
-    res = hhlsolve(mat,state, n_reg, C_value)
+    matx = array_qudiff(alg, tspan, dt) do t A(t) end
+    initstate = prepare_init_state(alg, tspan, x, dt) do t b(t) end
+    λ = maximum(eigvals(matx))
+    C_value = minimum(eigvals(matx) .|> abs)*0.01;
+    matx = 1/(λ*2)*matx
+    initstate = initstate*1/(2*λ) |> normalize!
+    res = hhlsolve(matx,initstate, n_reg, C_value)
     res = res/λ
     return res
 end;

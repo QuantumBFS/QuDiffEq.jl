@@ -1,9 +1,9 @@
 using Yao
 using BitBasis
 using Random
-using QuAlgorithmZoo
 using Test, LinearAlgebra
 using OrdinaryDiffEq
+using QuDiffEq
 
 function diffeq_problem(nbit::Int)
     siz = 1<<nbit
