@@ -1,15 +1,15 @@
 
-struct QuLDEParam{W,L,Q}
+struct QuLDEParam{W,L,Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}}
     k::Int
     t::L
     C_tilda::W
     D_tilda::W
     N::W
-    V::GeneralMatrixBlock{1}
-    VS1::GeneralMatrixBlock{Q}
-    VS2::GeneralMatrixBlock{Q}
-    WS1::GeneralMatrixBlock{Q}
-    WS2::GeneralMatrixBlock{Q}
+    V::VType
+    VS1::SType
+    VS2::SType
+    WS1::SType
+    WS2::SType
 
     function QuLDEParam(k::Int,t::L) where {L}
         C(m) = (t)^(m)/factorial(m)
@@ -35,17 +35,17 @@ struct QuLDEParam{W,L,Q}
         VS2[:,1] = col2
         VS1 = -1*qr(VS1).Q
         VS2 = -1*qr(VS2).Q
-        WS1 = VS1'
-        WS2 = VS2'
+        WS1 = convert(typeof(VS1),VS1')
+        WS2 = convert(typeof(VS1),VS2')
         VS1 = matblock(VS1)
         VS2 = matblock(VS2)
         WS1 = matblock(WS1)
         WS2 = matblock(WS2)
         n = Int(log2(k+1))
-        new{ComplexF64,L,n}(k,t,C_tilda,D_tilda,N,V,VS1,VS2,WS1,WS2)
+        new{ComplexF64,L,n, typeof(V), typeof(VS1)}(k,t,C_tilda,D_tilda,N,V,VS1,VS2,WS1,WS2)
     end
-
 end
+
 function quldecircuit(blk::QuLDEParam, M::Matrix)
     T = Int(log2(blk.k+1))
     siz, = size(M)

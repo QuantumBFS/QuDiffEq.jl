@@ -1,6 +1,5 @@
 export array_qudiff, prepare_init_state, bval, aval
-import QuAlgorithmZoo.hhlsolve
-import LinearAlgebra.eigvals
+
 """
     Based on : arxiv.org/abs/1010.2745v2
 
