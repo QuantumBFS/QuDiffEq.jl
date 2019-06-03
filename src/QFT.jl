@@ -1,6 +1,4 @@
-@static if VERSION >= v"0.7-"
-    using FFTW
-end
+using FFTW
 
 export QFTCircuit, QFTBlock, invorder_firstdim
 
