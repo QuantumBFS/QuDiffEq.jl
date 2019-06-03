@@ -5,6 +5,7 @@ using OrdinaryDiffEq
 using BitBasis
 using Random
 using Test
+using YaoBlocks
 
 #Linear Diff Equation Unitary M
 function diffeqProblem(nbit::Int)
