@@ -1,5 +1,16 @@
 module QuDiffEq
 
-greet() = print("Hello World!")
+using Yao
+using YaoBlocks
+using DiffEqBase
+using BitBasis
+using LinearAlgebra
 
+include("QuDiffProblem.jl")
+include("QuDiffAlgs.jl")
+include("QuLDE.jl")
+include("QuDiffHHL.jl")
+include("HHL.jl")
+include("PhaseEstimation.jl")
+include("QFT.jl")
 end # module
