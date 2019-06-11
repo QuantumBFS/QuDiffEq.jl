@@ -160,7 +160,7 @@ function quldecircuit(blk::QuLDEnonUnitParam, M::Matrix, nbit::Int, n::Int)
 
     circuitLinv = chain(n)
     for i in 1:blk.k
-        push!(circuitL, put(n,(blk.k+2+(i-1)*blk.l:blk.k+2+i*blk.l-1) => blk.WT))
+        push!(circuitLinv, put(n,(blk.k+2+(i-1)*blk.l:blk.k+2+i*blk.l-1) => blk.WT))
     end
 
     circuitInit = chain(n, control((-1,), (2:blk.k + 1...,) => blk.VS1), control((1,),(2:blk.k + 1...,)=>blk.VS2), circuitL)
