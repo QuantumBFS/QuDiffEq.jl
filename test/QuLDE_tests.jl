@@ -43,5 +43,5 @@ end
 
     out = solve(qprob, QuLDE(), k)
 
-    @test isapprox.(s[end-1:end], out, atol = 0.1) |> all
+    @test isapprox.(s[end-1:end], out, atol = 0.02) |> all
 end
