@@ -1,15 +1,15 @@
 
 struct QuLDEUnitParam{W,L,Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}}
-    k::Int
-    t::L
+    k::Int # Taylor expansion upto k
+    t::L # time
     C_tilda::W
     D_tilda::W
     N::W
     V::VType
-    VS1::SType
-    VS2::SType
-    WS1::SType
-    WS2::SType
+    VS1::SType # Q is input size of GMblock
+    VS2::SType # Q
+    WS1::SType # Q
+    WS2::SType # Q
 
     function QuLDEUnitParam(k::Int,t::L,prob::QuLDEProblem) where {L}
         C(m) = norm(prob.u0)*(opnorm(prob.A)*t)^(m)/factorial(m)
@@ -24,16 +24,16 @@ struct QuLDEUnitParam{W,L,Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMat
         N = sqrt(C_tilda + D_tilda)
         C_tilda = sqrt(C_tilda)
         D_tilda = sqrt(D_tilda)
-        V = [C_tilda D_tilda; D_tilda -1*C_tilda]/N
-        V = convert(Array{ComplexF64,2},V)
+        V = ComplexF64[C_tilda D_tilda; D_tilda -1*C_tilda]/N
         V = matblock(V)
 
-        col1 = (1/C_tilda) * [sqrt(C(m)) for m in 0:k]
-        col2 = (1/D_tilda) * [m < k+1 ? sqrt(C(m)) : 0 for m in 1:k+1]
         VS1 = rand(ComplexF64,k+1,k+1)
         VS2 = rand(ComplexF64,k+1,k+1)
-        VS1[:,1] = col1
-        VS2[:,1] = col2
+        for j in 0:k
+            VS1[j+1,1] = sqrt(C(j))/C_tilda
+            VS2[j+1,1] = sqrt(D(j+1))/D_tilda
+        end
+        VS2[k+1,1] = 0;
         VS1 = -1*qr(VS1).Q
         VS2 = -1*qr(VS2).Q
         WS1 = convert(typeof(VS1),VS1')
@@ -42,32 +42,32 @@ struct QuLDEUnitParam{W,L,Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMat
         VS2 = matblock(VS2)
         WS1 = matblock(WS1)
         WS2 = matblock(WS2)
-        n = Int(log2(k+1))
+        n = log2i(k+1)
         new{ComplexF64,L,n, typeof(V), typeof(VS1)}(k,t,C_tilda,D_tilda,N,V,VS1,VS2,WS1,WS2)
     end
 end
 
-struct QuLDEnonUnitParam{W,L,Q,NL,Nbit, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}, LType <: GeneralMatrixBlock{NL}}
-    k::Int
-    t::L
-    l::Int
-    C_tilda::W
-    D_tilda::W
+struct QuLDEnonUnitParam{L, W, Q, NL, Nbit, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}, LType <: GeneralMatrixBlock{NL}}
+    k::Int # Taylor expansion upto k
+    t::L # time
+    l::Int # input size of LType block set to 2
+    C_tilda::W #G1 as per the article
+    D_tilda::W #G2 as per the article
     N::W
     V::VType
-    VS1::SType
-    VS2::SType
-    WS1::SType
-    WS2::SType
-    VT::LType
-    WT::LType
-    F::Array{GeneralMatrixBlock{Nbit,Nbit,Complex{Float64},Array{Complex{Float64},2}},1}
+    VS1::SType # Q is input size of GMblock
+    VS2::SType # Q
+    WS1::SType # Q
+    WS2::SType # Q
+    VT::LType # NL is input size of GMblock
+    WT::LType # NL
+    F::Array{GeneralMatrixBlock{Nbit,Nbit,Complex{Float64},Array{Complex{Float64},2}},1} # Nbit is input size
 
     function QuLDEnonUnitParam(k::Int,t::L,l::Int,prob::QuLDEProblem) where {L}
         C(m) = norm(prob.u0)*((opnorm(prob.A)*t*2)^(m))/factorial(m)
         D(n) = norm(prob.b)*(opnorm(prob.A)*t*2)^(n-1)*t/factorial(n)
         nbit, = size(prob.u0)
-        nbit = Int(log2(nbit))
+        nbit = log2i(nbit)
         Mu = prob.A/opnorm(prob.A)
         B1 = 1/2*(Mu + Mu')
         B2 = -im/2*(Mu - Mu')
@@ -87,30 +87,18 @@ struct QuLDEnonUnitParam{W,L,Q,NL,Nbit, VType <: GeneralMatrixBlock{1}, SType <:
         end
         C_tilda = C_tilda + C(0)
         N = sqrt(C_tilda^2 + D_tilda^2)
-        V = [C_tilda D_tilda; D_tilda -1*C_tilda]/N
-        V = convert(Array{ComplexF64,2},V)
+        V = ComplexF64[C_tilda D_tilda; D_tilda -1*C_tilda]/N
         V = matblock(V)
         #tested
-
-        col1 = zeros(2^k,1)
-        col2 = zeros(2^k,1)
-        temp = map(0:k) do j 2^k - 2^(k-j) + 1 end
-        cont = 0
-        for i in temp
-            col1[i] = sqrt(C(cont))
-            cont += 1
-        end
-        cont = 1
-        for i in temp[2:end]
-            col2[i] = sqrt(D(cont))
-            cont += 1
-        end
-        #tested
-
         VS1 = rand(ComplexF64,2^k,2^k)
         VS2 = rand(ComplexF64,2^k,2^k)
-        VS1[:,1] = col1/sqrt(sum(col1.*col1))
-        VS2[:,1] = col2/sqrt(sum(col2.*col2))
+        VS1[:,1] = zero(VS1[:,1])
+        VS2[:,1] = zero(VS2[:,1])
+        for j in 0:k
+            VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j))/sqrt(C_tilda)
+            VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1))/sqrt(D_tilda)
+        end
+        VS2[2^k,1] = 0;
         VS1 = -1*qr(VS1).Q
         VS2 = -1*qr(VS2).Q
         WS1 = convert(typeof(VS1),VS1')
@@ -120,9 +108,8 @@ struct QuLDEnonUnitParam{W,L,Q,NL,Nbit, VType <: GeneralMatrixBlock{1}, SType <:
         WS1 = matblock(WS1)
         WS2 = matblock(WS2)
 
-        vcol = [sqrt(0.5) for i in 1:2^l]
         VT = rand(ComplexF64,2^l,2^l)
-        VT[:,1] = vcol/sqrt(sum(vcol.*vcol))
+        VT[:,1] = 0.5*ones(2^l,1)
         VT = -1*qr(VT).Q
         WT = convert(typeof(VT),VT')
         VT = matblock(VT)
@@ -132,7 +119,7 @@ struct QuLDEnonUnitParam{W,L,Q,NL,Nbit, VType <: GeneralMatrixBlock{1}, SType <:
 end
 
 function quldecircuit(blk::QuLDEUnitParam, M::Matrix, nbit::Int, n::Int)
-    T = Int(log2(blk.k+1))
+    T = log2i(blk.k+1)
     circuitInit = chain(n, control((-1,),(2:T+1...,)=>blk.VS1),control((1,),(2:T+1...,)=>blk.VS2))
 
     circuitIntermediate = chain(n)
@@ -166,9 +153,8 @@ function quldecircuit(blk::QuLDEnonUnitParam, M::Matrix, nbit::Int, n::Int)
     circuitInit = chain(n, control((-1,), (2:blk.k + 1...,) => blk.VS1), control((1,),(2:blk.k + 1...,)=>blk.VS2), circuitL)
 
     circuitIntermediate = chain(n)
-    a = Array{Int64,1}(undef, blk.l)
-    U = Matrix{ComplexF64}(I, 1<<nbit, 1<<nbit)
 
+    a = Array{Int64,1}(undef, blk.l)
     for i in 1:blk.k
         for j in 0:2^blk.l-1
             digits!(a,j,base = 2)
@@ -177,6 +163,7 @@ function quldecircuit(blk::QuLDEnonUnitParam, M::Matrix, nbit::Int, n::Int)
     end
 
     circuitFinal = chain(n, control((-1,), (2:blk.k + 1...,)=>blk.WS1), control((1,), (2:blk.k + 1...,)=>blk.WS2), circuitLinv, put(1=>blk.V))
+
     return chain(circuitInit, circuitIntermediate, circuitFinal)
 end
 
@@ -187,11 +174,11 @@ function DiffEqBase.solve(prob::QuLDEProblem{F,Q,R,P}, alg::QuLDE, k::Int = 3, l
     x = prob.u0
     Mu = M/opnorm(M)
     siz, = size(M)
-    nbit = Int(log2(siz))
+    nbit = log2i(siz)
 
     if (isunitary(Mu))
         blk = QuLDEUnitParam(k,t,prob)
-        T = Int(log2(k+1))
+        T = log2i(k+1)
         n = 1 + T + nbit
         inreg = ArrayReg(x/norm(x)) ⊗ zero_state(T) ⊗ ( (blk.C_tilda/blk.N) * zero_state(1) )+  ArrayReg(b/norm(b)) ⊗ zero_state(T) ⊗ ((blk.D_tilda/blk.N) *ArrayReg(bit"1") )
     else
