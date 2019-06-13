@@ -64,7 +64,7 @@ struct QuLDEnonUnitParam{L, W, Q, NL, Nbit, VType <: GeneralMatrixBlock{1}, STyp
     F::Array{GeneralMatrixBlock{Nbit,Nbit,Complex{Float64},Array{Complex{Float64},2}},1} # Nbit is input size
 
     function QuLDEnonUnitParam(k::Int,t::L,l::Int,prob::QuLDEProblem) where {L}
-        C(m) = norm(prob.u0)*((opnorm(prob.A)*t*2)^(m))/factorial(m)
+        C(m) = norm(prob.u0)*((opnorm(prob.A)*t*2)^(m))/factorial(m) # alphas equal 1/2
         D(n) = norm(prob.b)*(opnorm(prob.A)*t*2)^(n-1)*t/factorial(n)
         nbit, = size(prob.u0)
         nbit = log2i(nbit)
@@ -86,7 +86,9 @@ struct QuLDEnonUnitParam{L, W, Q, NL, Nbit, VType <: GeneralMatrixBlock{1}, STyp
             D_tilda = D_tilda + D(i)
         end
         C_tilda = C_tilda + C(0)
-        N = sqrt(C_tilda^2 + D_tilda^2)
+        N = sqrt(C_tilda+ D_tilda)
+        C_tilda = sqrt(C_tilda)
+        D_tilda = sqrt(D_tilda)
         V = ComplexF64[C_tilda D_tilda; D_tilda -1*C_tilda]/N
         V = matblock(V)
         #tested
@@ -95,8 +97,8 @@ struct QuLDEnonUnitParam{L, W, Q, NL, Nbit, VType <: GeneralMatrixBlock{1}, STyp
         VS1[:,1] = zero(VS1[:,1])
         VS2[:,1] = zero(VS2[:,1])
         for j in 0:k
-            VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j))/sqrt(C_tilda)
-            VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1))/sqrt(D_tilda)
+            VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j))/C_tilda
+            VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1))/D_tilda
         end
         VS2[2^k,1] = 0;
         VS1 = -1*qr(VS1).Q
