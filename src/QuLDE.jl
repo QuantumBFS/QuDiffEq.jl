@@ -1,3 +1,19 @@
+"""
+    Based on :  arxiv.org/abs/1807.04553
+
+    * Uses Taylor expansion
+
+    x' = Ax + b
+
+    * A - input matrix.
+    * b - input vector.
+    * x - inital vector
+    * t - time to be evaluated at
+
+    * Consists of two parts: A is unitary - QuLDEUnitParam() & A is non unitary - QuLDEnonUnitParam()
+    * quldecircuit() - generates qunatum cicuit
+
+"""
 
 struct QuLDEUnitParam{W,L,Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}}
     k::Int # Taylor expansion upto k
@@ -169,7 +185,7 @@ function quldecircuit(blk::QuLDEnonUnitParam, M::Matrix, nbit::Int, n::Int)
     return chain(circuitInit, circuitIntermediate, circuitFinal)
 end
 
-function DiffEqBase.solve(prob::QuLDEProblem{F,Q,R,P}, alg::QuLDE, k::Int = 3, l::Int = 2) where {F,Q,R,P}
+function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::QuLDE, k::Int = 3, l::Int = 2) where {uType,tType,isinplace, F, P}
     M = prob.A
     b = prob.b
     t = prob.tspan[2]
