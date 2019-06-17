@@ -16,11 +16,11 @@ struct QuLDEProblem{uType,tType,isinplace, F, P} <: QuODEProblem{uType,tType,isi
     u0::uType
     tspan::Tuple{tType,tType}
 
-    function QuLDEProblem(A::QuODEFunction{iip,MType},b,u0,tspan;kwargs...) where {iip,MType}
+    function QuLDEProblem(A::QuODEFunction{iip,MType},b::Array{ComplexF64,1},u0::Array{ComplexF64,1},tspan;kwargs...) where {iip,MType}
      new{typeof(u0),typeof(tspan),iip,typeof(A),typeof(b)}(A,b,u0,tspan)
     end
-    function QuLDEProblem(A,b,u0,tspan;kwargs...)
+    function QuLDEProblem(A,b::Array{T,1},u0::Array{G,1},tspan;kwargs...) where {T,G}
         f = QuODEFunction(A)
-     new{typeof(u0),typeof(tspan[1]),isinplace(f),typeof(A),typeof(b)}(f.linmatrix,b,u0,tspan)
+     new{Array{ComplexF64,1},typeof(tspan[1]),isinplace(f),typeof(A),Array{ComplexF64,1}}(f.linmatrix,b,u0,tspan)
     end
 end
