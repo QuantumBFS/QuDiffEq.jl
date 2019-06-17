@@ -3,10 +3,6 @@ export array_qudiff, prepare_init_state, bval, aval
 """
     Based on : arxiv.org/abs/1010.2745v2
 
-    * array_qudiff(N_t,N,h,A) - generates matrix for k-step solver
-    * prepare_init_state(b,x,h,N_t) - generates inital states
-    * solve_qudiff - solver
-
     x' = Ax + b
 
     * A - input matrix.
@@ -15,9 +11,10 @@ export array_qudiff, prepare_init_state, bval, aval
     * N - dimension of b (as a power of 2).
     * h - step size.
     * tspan - time span.
-"""
 
-"""
+    * array_qudiff(N_t,N,h,A) - generates matrix for k-step solver
+    * prepare_init_state(b,x,h,N_t) - generates inital states
+
     LDEMSAlgHHL
     * step - step for multistep method
     * α - coefficients for xₙ
@@ -83,7 +80,7 @@ function array_qudiff(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},h::
     return A_
 end
 
-function DiffEqBase.solve(prob::QuLDEProblem{F,C,U,T}, alg::LDEMSAlgHHL, dt = (prob.tspan[2]-prob.tspan[1])/100, n_reg::Int = 12) where {F,C,U,T}
+function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::LDEMSAlgHHL, dt = (prob.tspan[2]-prob.tspan[1])/100, n_reg::Int = 12) where {uType,tType,isinplace, F, P}
     A = prob.A
     b = prob.b
     tspan = prob.tspan

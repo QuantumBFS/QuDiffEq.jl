@@ -10,10 +10,11 @@ using YaoBlocks
 #Linear Diff Equation Unitary M
 function diffeqProblem(nbit::Int)
     siz = 1<<nbit
-    A = rand_unitary(siz)
+    Au = rand_unitary(siz)
+    An = rand(ComplexF64,siz,siz)
     b = normalize!(rand(ComplexF64, siz))
     x = normalize!(rand(ComplexF64, siz))
-    A, b, x
+    Au,An,b, x
 end
 
 @testset "QuLDE_Test" begin
@@ -21,10 +22,9 @@ end
     N = 1
     k = 3
     tspan = (0.0,0.4)
-    A,b,x = diffeqProblem(N)
-
-    qprob = QuLDEProblem(A, b, x, tspan)
-    f(u,p,t) = A*u + b;
+    Au,An,b,x = diffeqProblem(N)
+    qprob = QuLDEProblem(Au, b, x, tspan)
+    f(u,p,t) = Au*u + b;
     prob = ODEProblem(f, x, tspan)
 
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
@@ -33,4 +33,15 @@ end
     out = solve(qprob, QuLDE(), k)
 
     @test isapprox.(s[end-1:end], out, atol = 0.01) |> all
+
+    qprob = QuLDEProblem(An, b, x, tspan)
+    f(u,p,t) = An*u + b;
+    prob = ODEProblem(f, x, tspan)
+
+    sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
+    s = vcat(sol.u...)
+
+    out = solve(qprob, QuLDE(), k)
+
+    @test isapprox.(s[end-1:end], out, atol = 0.02) |> all
 end
