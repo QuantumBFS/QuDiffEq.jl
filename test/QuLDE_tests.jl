@@ -42,6 +42,5 @@ end
     s = vcat(sol.u[end])
 
     out = solve(qprob, QuLDE(), k)
-
     @test isapprox.(s, out, atol = 0.02) |> all
 end

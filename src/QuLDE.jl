@@ -14,7 +14,6 @@
     * quldecircuit() - generates qunatum cicuit
 
 """
-
 struct QuLDEUnitParam{PType, L, Q, VType <: GeneralMatrixBlock{1}, SType <: GeneralMatrixBlock{Q}}
     k::Int # Taylor expansion upto k
     t::L # time
@@ -94,7 +93,6 @@ struct QuLDEnonUnitParam{PType ,L, Q, NL, Nbit, VType <: GeneralMatrixBlock{1}, 
         F[3] = matblock(im*B2 - sqrt(iden - B2*B2))
         F[4] = matblock(im*B2 + sqrt(iden - B2*B2))
         #tested
-
         C_tilda = 0
         D_tilda = 0
         for i in 1:k
