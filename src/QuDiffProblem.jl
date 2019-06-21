@@ -15,7 +15,6 @@ struct QuLDEProblem{uType,tType,isinplace, F, P} <: QuODEProblem{uType,tType,isi
     b::P
     u0::uType
     tspan::Tuple{tType,tType}
-
     function QuLDEProblem(A::QuODEFunction{iip,MType},b::Array{T,1},u0::Array{G,1},tspan;kwargs...) where {iip,MType,T,G}
         PType = eltype(A.linmatrix)
      new{Array{Complex{PType},1},typeof(tspan),iip,typeof(A.linmatrix),Array{Complex{PType},1}}(A.linmatrix,b,u0,tspan)
