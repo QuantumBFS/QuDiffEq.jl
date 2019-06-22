@@ -28,7 +28,7 @@ end
     prob = ODEProblem(f, x, tspan)
 
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
-    s = vcat(sol.u[end])
+    s = sol.u[end]
 
     out = solve(qprob, QuLDE(), k)
 
@@ -39,7 +39,7 @@ end
     prob = ODEProblem(f, x, tspan)
 
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
-    s = vcat(sol.u[end])
+    s = sol.u[end]
 
     out = solve(qprob, QuLDE(), k)
     @test isapprox.(s, out, atol = 0.02) |> all
