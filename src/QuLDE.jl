@@ -219,7 +219,7 @@ function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::
     return out
 end;
 
-function DiffEqBase.solve(prob::ODEProblem, alg::QuLDE, dt = (prob.tspan[2]-prob.tspan[1])/10 ;kwargs...)
+function DiffEqBase.solve(prob::ODEProblem, alg::QuLDE; dt = (prob.tspan[2]-prob.tspan[1])/10 ,kwargs...)
     u0 = prob.u0
     siz, = size(u0)
     if !ispow2(siz) || siz == 1
