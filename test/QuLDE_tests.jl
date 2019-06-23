@@ -28,20 +28,19 @@ end
     prob = ODEProblem(f, x, tspan)
 
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
-    s = vcat(sol.u...)
+    s = sol.u[end]
 
-    out = solve(qprob, QuLDE(), k)
+    out = solve(qprob, QuLDE(k))
 
-    @test isapprox.(s[end-1:end], out, atol = 0.01) |> all
+    @test isapprox.(s, out, atol = 0.01) |> all
 
     qprob = QuLDEProblem(An, b, x, tspan)
     f(u,p,t) = An*u + b;
     prob = ODEProblem(f, x, tspan)
 
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
-    s = vcat(sol.u...)
+    s = sol.u[end]
 
-    out = solve(qprob, QuLDE(), k)
-
-    @test isapprox.(s[end-1:end], out, atol = 0.02) |> all
+    out = solve(qprob, QuLDE(k))
+    @test isapprox.(s, out, atol = 0.02) |> all
 end
