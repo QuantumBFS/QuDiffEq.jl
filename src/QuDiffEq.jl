@@ -5,6 +5,7 @@ using YaoBlocks
 using DiffEqBase
 using BitBasis
 using LinearAlgebra
+using ForwardDiff
 
 include("QuDiffProblem.jl")
 include("QuDiffAlgs.jl")

@@ -189,11 +189,12 @@ function quldecircuit(blk::QuLDEnonUnitParam, M::Matrix, nbit::Int, n::Int)
     return chain(circuitInit, circuitIntermediate, circuitFinal)
 end
 
-function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::QuLDE, k::Int = 3, l::Int = 2) where {uType,tType,isinplace, F, P}
+function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::QuLDE; kwargs...) where {uType,tType,isinplace, F, P}
     M = prob.A
     b = prob.b
     t = prob.tspan[2] - prob.tspan[1]
     x = prob.u0
+    k = alg.k
     Mu = M/opnorm(M)
     siz, = size(M)
     nbit = log2i(siz)
@@ -205,6 +206,7 @@ function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::
         CPType = get_param_type(blk)
         inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,T) ⊗ ( (blk.C_tilda/blk.N) * zero_state(CPType,1) )+  ArrayReg(b/norm(b)) ⊗ zero_state(CPType,T) ⊗ ((blk.D_tilda/blk.N) * ArrayReg(CPType, bit"1") )
     else
+        l = 2
         blk = QuLDEnonUnitParam(k,t,l,prob)
         n = 1 + k*(1 + l) + nbit
         CPType = get_param_type(blk)
@@ -216,3 +218,31 @@ function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::
     out = (blk.N^2)*(vec(res))
     return out
 end;
+
+function DiffEqBase.solve(prob::ODEProblem, alg::QuLDE, dt = (prob.tspan[2]-prob.tspan[1])/10 ;kwargs...)
+    u0 = prob.u0
+    siz, = size(u0)
+    if !ispow2(siz) || siz == 1
+        throw("Enter arrays of length that are powers of 2 greater than 1.")
+    end
+    f = prob.f
+    p = prob.p
+    tspan = prob.tspan
+    k = alg.k
+    Δu = alg.Δu
+
+    length = round(Int,(tspan[2] - tspan[1])/dt) + 1
+    res = Array{eltype(u0),2}(undef,length,siz)
+    utemp = u0
+    b = zero(u0)
+    for i in 0:length - 2
+        res[i+1,:] = utemp
+        f(b,utemp,p,i*dt + tspan[1])
+        J = ForwardDiff.jacobian((du,u) -> f(du,u,p, i*dt+tspan[1]),b,utemp)
+        qprob = QuLDEProblem(J,b,Δu,(0.0,dt))
+        out = solve(qprob,QuLDE(k))
+        utemp = real(out + utemp)
+    end
+    res[end,:] = utemp
+    return res
+end

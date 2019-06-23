@@ -30,7 +30,7 @@ end
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
     s = sol.u[end]
 
-    out = solve(qprob, QuLDE(), k)
+    out = solve(qprob, QuLDE(k))
 
     @test isapprox.(s, out, atol = 0.01) |> all
 
@@ -41,6 +41,6 @@ end
     sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
     s = sol.u[end]
 
-    out = solve(qprob, QuLDE(), k)
+    out = solve(qprob, QuLDE(k))
     @test isapprox.(s, out, atol = 0.02) |> all
 end
