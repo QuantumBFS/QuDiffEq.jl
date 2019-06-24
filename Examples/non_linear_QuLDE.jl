@@ -22,11 +22,11 @@ u0 = [0.2,0.1]
 Δu = [1e-6,1e-6]
 h = 0.1
 k = 3
-tspan = (0.0,0.4)
+tspan = (0.0,0.8)
 prob = ODEProblem(f,u0,tspan)
 
-qsol = solve(prob,QuLDE(k,Δu),0.1)
+qsol = solve(prob,QuLDE(k,Δu),dt = 0.1)
 sol = solve(prob,Tsit5(),dt = 0.1,adaptive = false)
 v = transpose(hcat(sol.u...))
 
-@test isapprox.(v,res, atol = 1e-3) |> all
+@test isapprox.(v,qsol, atol = 1e-3) |> all
