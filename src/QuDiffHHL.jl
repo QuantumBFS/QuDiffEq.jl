@@ -80,11 +80,12 @@ function array_qudiff(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},h::
     return A_
 end
 
-function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::LDEMSAlgHHL, dt = (prob.tspan[2]-prob.tspan[1])/100, n_reg::Int = 12) where {uType,tType,isinplace, F, P}
+function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::LDEMSAlgHHL; dt = (prob.tspan[2]-prob.tspan[1])/100, kwargs...) where {uType,tType,isinplace, F, P}
     A = prob.A
     b = prob.b
     tspan = prob.tspan
     x = prob.u0
+    nreg = alg.nreg
 
     matx = array_qudiff(alg, tspan, dt) do t A(t) end
     initstate = prepare_init_state(alg, tspan, x, dt) do t b(t) end

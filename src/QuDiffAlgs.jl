@@ -26,34 +26,35 @@ struct QuEuler{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
     β::Vector{T}
-
-    QuEuler(::Type{T} = Float64) where {T} = new{T}(1,[1.0,],[1.0,])
+    nreg::Int
+    QuEuler(nreg = 12,::Type{T} = Float64) where {T} = new{T}(1,[1.0,],[1.0,],nreg)
 end
 
 struct QuLeapfrog{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
     β::Vector{T}
-
-    QuLeapfrog(::Type{T} = Float64) where {T} = new{T}(2,[0, 1.0],[2.0, 0])
+    nreg::Int
+    QuLeapfrog(nreg = 12,::Type{T} = Float64) where {T} = new{T}(2,[0, 1.0],[2.0, 0],nreg)
 end
 struct QuAB2{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
     β::Vector{T}
-
-    QuAB2(::Type{T} = Float64) where {T} = new{T}(2,[1.0, 0], [1.5, -0.5])
+    nreg::Int
+    QuAB2(nreg = 12,::Type{T} = Float64) where {T} = new{T}(2,[1.0, 0], [1.5, -0.5],nreg)
 end
 struct QuAB3{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
     β::Vector{T}
-    QuAB3(::Type{T} = Float64) where {T} = new{T}(3,[1.0, 0, 0], [23/12, -16/12, 5/12])
+    nreg::Int
+    QuAB3(nreg = 12,::Type{T} = Float64) where {T} = new{T}(3,[1.0, 0, 0], [23/12, -16/12, 5/12],nreg)
 end
 struct QuAB4{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
     β::Vector{T}
-
-    QuAB4(::Type{T} = Float64) where {T} = new{T}(4,[1.0, 0, 0, 0], [55/24, -59/24, 37/24, -9/24])
+    nreg::Int
+    QuAB4(nreg = 12,::Type{T} = Float64) where {T} = new{T}(4,[1.0, 0, 0, 0], [55/24, -59/24, 37/24, -9/24],nreg)
 end
