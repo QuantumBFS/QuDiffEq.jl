@@ -20,7 +20,7 @@ pkg> add https://github.com/QuantumBFS/QuDiffEq.jl.git
 ## Algorithms
 
 - Quantum Algorithms for Linear Differential Equations
-  - Based on Taylor Expansion (ref : arxiv.org/abs/1807.04553)
+  - Based on truncated Taylor series (ref : arxiv.org/abs/1807.04553)
   - Based on HHL (ref : arxiv.org/abs/1010.2745v2)
 
 
@@ -31,8 +31,8 @@ pkg> add https://github.com/QuantumBFS/QuDiffEq.jl.git
 
 ## Authors
 
-See the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See the list of [contributors](https://github.com/QuantumBFS/QuDiffEq.jl/graphs/contributors) who participated in this project.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/QuantumBFS/QuDiffEq.jl/blob/master/LICENSE) file for details
