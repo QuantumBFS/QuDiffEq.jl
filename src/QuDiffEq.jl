@@ -14,4 +14,5 @@ include("QuDiffHHL.jl")
 include("HHL.jl")
 include("PhaseEstimation.jl")
 include("QFT.jl")
+include("TaylorTrunc.jl")
 end # module

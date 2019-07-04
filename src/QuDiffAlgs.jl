@@ -11,10 +11,9 @@ Linear differential equation solvers (non-HHL)
 ref : arxiv.org/abs/1807.04553
 """
 
-struct QuLDE{T} <: QuODEAlgorithm
+struct QuLDE <: QuODEAlgorithm
     k::Int
-    Δu::Array{T,1}
-    QuLDE(k = 3,Δu = [1e-6,1e-6]) = new{eltype(Δu)}(k,Δu)
+    QuLDE(k = 3) = new(k)
 end
 
 """
