@@ -11,7 +11,7 @@ function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
     du[2] = -u[2]^2 - u[1]*u[2]
 end
-@testset "QuLDE_Test" begin
+@testset "QuNLDE_Test" begin
     Random.seed!(4)
     N = 2
     k = 3
@@ -25,9 +25,10 @@ end
     A[9,11] = ComplexF32(-1)
     A[9,7] = ComplexF32(-1)
 
-    qprob = QuLDEProblem(A, x, tspan)
-    out = transformfunc(qprob.A, qprob.u0, k )
+    qprob = QuLDEProblem(A, x, (0.0,0.1))
+    r,N = transformfunc(qprob.A, qprob.b, k)
+    out = N*vec(state(r))
     r_out = zero(x)
     f(r_out, x,1,1)
-    @test isapprox.(r_out, 2*out[2:3], atol = 1e-3) |> all
+    @test isapprox.(r_out, out[2:3], atol = 1e-3) |> all
 end

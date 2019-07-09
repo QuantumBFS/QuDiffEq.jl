@@ -17,6 +17,10 @@ end
     include("QuLDE_tests.jl")
 end
 
+@testset "QuNLDE_test" begin
+    include("QuNLDE_tests.jl")
+end
+
 @testset "QuDiffHHL_tests" begin
     include("QuLDE_tests.jl")
 end

@@ -1,3 +1,4 @@
+export transformfunc
 function transformfunc(A::Matrix, x::Vector, k::Int, ϵ = 1e-3)
     if !(norm(x) ≈ 1)
         throw(ArgumentError("Input vector is not normalized"))
@@ -15,6 +16,6 @@ function transformfunc(A::Matrix, x::Vector, k::Int, ϵ = 1e-3)
     r, N = taylorsolve(im*H,u0,k,ϵ)
     n = log2i(siz)
     nbit = 2*n+ 1
-    r = relax!(r) |> focus!(nbit)|> select!(1) |> focus!(1:n...,) |> select!(0)|> state
-    return N*vec(r)/ϵ
+    r = relax!(r) |> focus!(nbit)|> select!(1) |> focus!(1:n...,) |> select!(0)
+    return r,2*N/ϵ
 end

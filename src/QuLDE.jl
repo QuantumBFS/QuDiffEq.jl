@@ -149,9 +149,9 @@ struct QuLDEProbParam{CPType, L, Q, NL, Nbit, SType <: GeneralMatrixBlock{Q}, LT
     F::Array{GeneralMatrixBlock{Nbit,Nbit,CPType,Array{CPType,2}},1} # Nbit is input size
 
     function QuLDEProbParam(k::Int,t::L,l::Int,prob::QuLDEProblem) where L
-        CPType = eltype(prob.u0)
-        D(n) = norm(prob.u0)*(opnorm(prob.A)*t*2)^(n-1)*t/factorial(n)
-        nbit, = size(prob.u0)
+        CPType = eltype(prob.b)
+        D(n) = norm(prob.b)*(opnorm(prob.A)*t*2)^(n-1)*t/factorial(n)
+        nbit, = size(prob.b)
         nbit = log2i(nbit)
         Mu = prob.A/opnorm(prob.A)
         B1 = convert(Array{CPType,2},1/2*(Mu + Mu'))
@@ -302,7 +302,7 @@ end;
 
 function DiffEqBase.solve(prob::QuLDEProblem{uType, tType, isinplace, F, P, true}, alg::QuLDE; kwargs...) where {uType, tType, isinplace, F, P}
     M = prob.A
-    b = prob.u0
+    b = prob.b
     t = prob.tspan[2] - prob.tspan[1]
     Mu = M/opnorm(M)
     k = alg.k

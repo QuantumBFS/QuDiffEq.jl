@@ -24,18 +24,14 @@ end
     Au,An,b,x = diffeqProblem(N)
 
     qprob = QuLDEProblem(Au, b, x, tspan)
-
     r,N = taylorsolve(qprob.A,qprob.u0,k,tspan[2])
     out = N*vec(state(r))
     r_out = exp(qprob.A*tspan[2])*qprob.u0
     @test isapprox.(r_out, out, atol = 1e-3) |> all
-
 
     qprob = QuLDEProblem(An, b, x, tspan)
     r,N = taylorsolve(qprob.A,qprob.u0,k,tspan[2])
     out = N*vec(state(r))
     r_out = exp(qprob.A*tspan[2])*qprob.u0
     @test isapprox.(r_out, out, atol = 1e-3) |> all
-
-
 end

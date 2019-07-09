@@ -1,50 +1,155 @@
-export TaylorUnitParam, TaylornonUnitParam
-export taylorcircuit, get_param_type, taylorsolve
-struct TaylorUnitParam{CPType, L, HM, Q, SType <: GeneralMatrixBlock{Q}}
+export TaylorParam
+export taylorcircuit, get_param_type, taylorsolve, circuit_init, circuit_final, circuit_intermediate
+export v,lc
+
+const C(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m)/factorial(m)
+const D(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m-1)*t/factorial(m)
+struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
     k::Int # Taylor expansion upto k
     t::L
-    H::HM # time
+    H::HM
+    l::Int
+    rs::Int
     C_tilda::CPType
-    VS1::SType # Q is input size of GMblock
-    WS1::SType # Q
+    D_tilda::CPType
+    N::CPType
+    V::VType
+    VS1::S1Type # Q is input size of GMblock
+    VS2::S2Type
+    VT::WType
 
-    function TaylorUnitParam(k::Int, t::L, H::Matrix, x::Array{CPType,1}) where {L,CPType}
-        C(m) = norm(x)*(opnorm(H)*t)^(m)/factorial(m)
+    function TaylorParam(k::Int, t::L, H::Matrix, x::Array{CPType,1}) where {L,CPType}
+        opn = opnorm(H)
+        u = isunitary(H/opn)
+        VT = nothing
         C_tilda = 0
-        for i in 0:k
-            C_tilda = C_tilda + C(i)
+        if u
+            for i in 0:k
+                C_tilda = C_tilda + C(i, x, opn,t,1)
+            end
+            N = C_tilda
+            C_tilda = sqrt(C_tilda)
+            rs = log2i(k+1)
+            VS1 = calc_vs1(k,rs,x,t,opn, C_tilda)
+            l = 0
+        else
+            for i in 0:k
+                C_tilda = C_tilda + C(i, x, opn,t,2)
+            end
+            N = C_tilda
+            C_tilda = sqrt(C_tilda)
+            rs = k
+            l = 2
+            VT = calc_vt(CPType)
+            VS1 = calc_vs1(k,x,t,opn, C_tilda)
         end
 
-        VS1 = rand(CPType,k+1,k+1)
-        for j in 0:k
-            VS1[j+1,1] = sqrt(C(j)/C_tilda)
-        end
-        VS1 = -1*qr(VS1).Q
-        WS1 = convert(typeof(VS1),VS1')
-        VS1 = matblock(VS1)
-        WS1 = matblock(WS1)
+        new{CPType, u, L, Array{CPType,2}, Nothing, typeof(VS1), Nothing, typeof(VT)}(k, t, H, l, rs, C_tilda, zero(C_tilda), N, nothing, VS1, nothing,VT)
+    end
 
-        n = log2i(k+1)
-        new{CPType, L, Array{CPType,2}, n, typeof(VS1)}(k, t, H, C_tilda, VS1, WS1)
+    function TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T}) where {L,uType, tType, isinplace, F, P, T}
+        CPType = eltype(prob.u0)
+        opn = opnorm(prob.A)
+        VS2 = nothing
+        V = nothing
+        VT = nothing
+        D_tilda = 0
+        C_tilda = 0
+
+        if u
+            for i in 1:k
+                D_tilda = D_tilda + D(i, prob.b, opn,t,1)
+            end
+            N = D_tilda
+            D_tilda = sqrt(D_tilda)
+
+            u = isunitary(prob.A/opn)
+            rs = log2i(k+1)
+            VS1 = calc_vs2(k,rs,prob.b,t, opn, D_tilda)
+        else
+            for i in 1:k
+                D_tilda = D_tilda + D(i, prob.b, opn,t,2)
+            end
+            N = D_tilda
+            D_tilda = sqrt(D_tilda)
+            VT = calc_vt(CPType)
+            u = isunitary(prob.A/opn)
+            rs = k
+            VS1 = calc_vs2(k,prob.b,t, opn, D_tilda)
+        end
+        if !(T)
+            VS2 = VS1
+            if u
+                for i in 0:k
+                    C_tilda = C_tilda + C(i, prob.u0, opn, t,1)
+                end
+                C_tilda = sqrt(C_tilda)
+                VS1 = calc_vs1(k,rs,prob.u0,t, opn, C_tilda)
+            else
+                for i in 0:k
+                    C_tilda = C_tilda + C(i, prob.u0, opn, t,2)
+                end
+                C_tilda = sqrt(C_tilda)
+                VS1 = calc_vs1(k,prob.u0,t, opn, C_tilda)
+            end
+            N = sqrt(C_tilda^2 + D_tilda^2)
+            V = CPType[C_tilda/N D_tilda/N; D_tilda/N -1*C_tilda/N]
+            V = matblock(V)
+        end
+        new{CPType, u, typeof(VS1), L, Array{CPType,2}, typeof(V), typeof(VS1), typeof(VS2),typeof(VT)}(k, t, H, 2, rs, C_tilda, D_tilda, N, V, VS1, VS2,VT)
     end
 end
-struct TaylornonUnitParam{CPType, L, HM, Q, NL, Nbit, SType <: GeneralMatrixBlock{Q}, LType <: GeneralMatrixBlock{NL}}
-    k::Int # Taylor expansion upto k
-    t::L # time
-    l::Int
-    H::HM # input size of LType block set to 2
-    C_tilda::CPType #G1 as per the article
-    VS1::SType # Q is input size of GMblock
-    WS1::SType # Q
-    VT::LType # NL is input size of GMblock
-    WT::LType # NL
-    F::Array{GeneralMatrixBlock{Nbit,Nbit,CPType,Array{CPType,2}},1} # Nbit is input size
 
-    function TaylornonUnitParam(k::Int,t::L,l::Int,H::Matrix,x::Array{CPType,1}) where {L,CPType}
-        C(m) = norm(x)*((opnorm(H)*t*2)^(m))/factorial(m) # alphas equal 1/2
-        nbit, = size(x)
-        nbit = log2i(nbit)
+function calc_vs1(k::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
+    CPType = eltype(x)
+    VS1 = rand(CPType,2^k,2^k)
+    VS1[:,1] = zero(VS1[:,1])
+    for j in 0:k
+        VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j, x, opn, t,2))/C_tilda
+    end
+    VS1 = -1*qr(VS1).Q
+    return VS1
+end
+
+function calc_vs1(k::Int, rs::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
+    CPType = eltype(x)
+    VS1 = rand(CPType,2^rs,2^rs)
+    for j in 0:k
+        VS1[j+1,1] = sqrt(C(j, x, opn, t,1))/C_tilda
+    end
+    VS1 = -1*qr(VS1).Q
+    return VS1
+end
+
+function calc_vs2(k::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
+    D(m) = norm(prob.b)*(opn*t)^(m-1)*t/factorial(m)
+    VS2 = rand(CPType,2^k,2^k)
+    VS2[:,1] = zero(VS2[:,1])
+    for j in 0:k-1
+        VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1, x, opn, t, 2))/D_tilda
+    end
+    VS2 = -1*qr(VS2).Q
+    return VS2
+end
+
+function calc_vs2(k::Int, rs::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
+    VS2 = rand(CPType,2^rs,2^rs)
+    for j in 0:k - 1
+        VS2[j+1,1] = sqrt(D(j+1, x, opn, t, 1))/D_tilda
+    end
+    VS2[k+1,1] = 0;
+    VS2 = -1*qr(VS2).Q
+    return VS2
+end
+
+function unitary_decompose(H::Matrix)
+    if isunitary(H)
+        return H
+    else
         Mu = H/opnorm(H)
+        CPType = eltype(H)
+        nbit, = size(H)
+        nbit = log2i(nbit)
         B1 = convert(Array{CPType,2},1/2*(Mu + Mu'))
         B2 = convert(Array{CPType,2},-im/2*(Mu - Mu'))
         iden = Matrix{CPType}(I,size(B1))
@@ -53,101 +158,122 @@ struct TaylornonUnitParam{CPType, L, HM, Q, NL, Nbit, SType <: GeneralMatrixBloc
         F[2] = matblock(B1 - im*sqrt(iden - B1*B1))
         F[3] = matblock(im*B2 - sqrt(iden - B2*B2))
         F[4] = matblock(im*B2 + sqrt(iden - B2*B2))
-
-        C_tilda = 0
-        for i in 0:k
-            C_tilda = C_tilda + C(i)
-        end
-
-        VS1 = rand(CPType,2^k,2^k)
-        VS1[:,1] = zero(VS1[:,1])
-        for j in 0:k
-            VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j)/C_tilda)
-        end
-        VS1 = -1*qr(VS1).Q
-        WS1 = convert(typeof(VS1),VS1')
-        VS1 = matblock(VS1)
-        WS1 = matblock(WS1)
-
-        VT = rand(CPType,2^l,2^l)
-        VT[:,1] = 0.5*ones(2^l,1)
-        VT = -1*qr(VT).Q
-        WT = convert(typeof(VT),VT')
-        VT = matblock(VT)
-        WT = matblock(WT)
-        new{CPType, L, Array{CPType,2}, k, l, nbit, typeof(VS1),typeof(VT)}(k, t, l, H, C_tilda, VS1, WS1, VT, WT, F)
+        return F
     end
 end
 
-get_param_type(blk::TaylorUnitParam{CPType}) where {CPType} = CPType
-get_param_type(blk::TaylornonUnitParam{CPType}) where {CPType} = CPType
+function calc_vt(::Type{CPType} = ComplexF32) where CPType
+    VT = rand(CPType,4,4)
+    VT[:,1] = 0.5*ones(4)
+    VT = -1*qr(VT).Q
+    return VT
+end
 
-function taylorcircuit(blk::TaylorUnitParam, nbit::Int, n::Int)
-    T = log2i(blk.k+1)
-    CPType = get_param_type(blk)
-    circuitInit = chain(n, put((1:T...,)=>blk.VS1))
+v(n::Int,c::Int, T::Int, V::AbstractMatrix) = put(n, (c + 1:T + c...,)=>matblock(V))
+v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) = control(n, j,(1 + c:T + c...,)=>matblock(V))
+lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = put(n, (k+c+1+(i-1)*l:k+1+c+i*l-1) => matblock(V))
 
-    circuitIntermediate = chain(n)
-    a = Array{Int32,1}(undef, T)
-    U = Matrix{CPType}(I, 1<<nbit,1<<nbit)
+circuit_init(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c,(-1,), blk.rs, blk.VS1),v(n, c, (1,), blk.rs, blk.VS2))
+circuit_init(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs, blk.VS1))
+
+function circuit_init(n::Int,c::Int, blk::TaylorParam{CPType, false}) where CPType
+    cir = chain(n, v(n, c,(-1,), blk.rs, blk.VS1),v(n, c, (1,), blk.rs, blk.VS2))
+    for i in 1:blk.k
+        push!(cir, lc(n, c, i, blk.k, blk.l, blk.VT))
+    end
+    return cir
+end
+
+function circuit_init(n::Int, blk::TaylorParam{CPType, false}) where CPType
+    cir = chain(n, v(n, 0, blk.rs, blk.VS1))
+    for i in 1:blk.k
+        push!(cir, lc(n, 0, i, blk.k, blk.l, blk.VT))
+    end
+    return cir
+end
+
+function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType
     H = blk.H/opnorm(blk.H)
-    for i in 0:blk.k
+    k = blk.k
+    l = blk.l
+    rs = blk.rs
+    cir = chain(n)
+    nbit = n - rs - c
+    a = Array{Int32,1}(undef, rs)
+    U = Matrix{CPType}(I, 1<<nbit,1<<nbit)
+
+    for i in 0:k
         digits!(a,i,base = 2)
         G = matblock(U)
-        push!(circuitIntermediate,control(n, (-1*collect(1:T).*((-1*ones(Int, T)).^a)...,), (T+1:n...,)=>G))
+        push!(cir,control(n, (-1*collect(1+c:rs+c).*((-1*ones(Int, rs)).^a)...,), (rs+1+c:n...,)=>G))
         U = H*U
     end
-
-    circuitFinal = chain(n, put((1:T...,)=>blk.WS1))
-
-    return chain(circuitInit,circuitIntermediate,circuitFinal)
+    return cir
 end
 
-function taylorcircuit(blk::TaylornonUnitParam, nbit::Int, n::Int)
-    circuitL = chain(n)
-    for i in 1:blk.k
-        push!(circuitL, put(n,(blk.k+1+(i-1)*blk.l:blk.k+1+i*blk.l-1) => blk.VT))
-    end
-
-    circuitLinv = chain(n)
-    for i in 1:blk.k
-        push!(circuitLinv, put(n,(blk.k+1+(i-1)*blk.l:blk.k+1+i*blk.l-1) => blk.WT))
-    end
-
-    circuitInit = chain(n, put((1:blk.k...,) => blk.VS1), circuitL)
-
-    circuitIntermediate = chain(n)
-
-    a = Array{Int64,1}(undef, blk.l)
-    for i in 1:blk.k
-        for j in 0:2^blk.l-1
+function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false}) where CPType
+    H = blk.H/opnorm(blk.H)
+    k = blk.k
+    l = blk.l
+    rs = blk.rs
+    cir = chain(n)
+    nbit = n - k*(l+1) - c
+    F = unitary_decompose(H)
+    a = Array{Int64,1}(undef, l)
+    for i in 1:k
+        for j in 0:2^l-1
             digits!(a,j,base = 2)
-            push!(circuitIntermediate, control(n, (i, -1*collect(blk.k+1+(i-1)*blk.l:blk.k+1+i*blk.l-1).*((-1*ones(Int, blk.l)).^a)...,), (n - nbit + 1 : n...,)=>blk.F[j+1]))
+            push!(cir, control(n, (i + c, -1*collect(k+1+c+(i-1)*l:k+1+c+i*l-1).*((-1*ones(Int, l)).^a)...,), (n - nbit + 1 : n...,)=>F[j+1]))
         end
     end
+    return cir
+end
 
-    circuitFinal = chain(n, put((1:blk.k...,)=>blk.WS1), circuitLinv)
+circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'))
+circuit_final(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs,blk.VS1'))
 
-    return chain(circuitInit, circuitIntermediate, circuitFinal)
+function circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, false}) where CPType
+    cir = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'))
+    for i in 1:blk.k
+        push!(cir, lc(n,c,i,blk.k,blk.l,blk.VT'))
+    end
+    return cir
+end
+
+function circuit_final(n::Int, blk::TaylorParam{CPType, false}) where CPType
+    cir = chain(n, v(n, 0, blk.rs,blk.VS1'))
+    for i in 1:blk.k
+        push!(cir, lc(n,0,i,blk.k,blk.l,blk.VT'))
+    end
+    return cir
+end
+
+get_param_type(blk::TaylorParam{CPType}) where {CPType} = CPType
+
+function taylorcircuit(n::Int, blk::TaylorParam)
+    circinit = circuit_init(n,blk)
+    circmid = circuit_intermediate(n,0,blk)
+    circfin =circuit_final(n,blk)
+    return chain(circinit, circmid, circfin)
 end
 
 function taylorsolve(H::Matrix, x::Vector, k::Int, t::Real)
-    Mu = H/opnorm(H)
+
     nbit = log2i(length(x))
-    if (isunitary(H))
-        blk = TaylorUnitParam(k,t,H,x)
-        T = log2i(k+1)
-        n = T + nbit
-        CPType = get_param_type(blk)
-        inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,T)
+    blk = TaylorParam(k,t,H,x)
+    CPType = get_param_type(blk)
+    rs = blk.rs
+    k = blk.k
+    l = blk.l
+    if rs != k
+        n = rs + nbit
+        inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,rs)
     else
-        l = 2
-        blk = TaylornonUnitParam(k,t,l,H,x)
         n = k*(1 + l) + nbit
         CPType = get_param_type(blk)
         inreg = ArrayReg(x/norm(x))⊗ zero_state(CPType, k*l)  ⊗ zero_state(CPType, k)
     end
-    cir = taylorcircuit(blk,nbit,n)
+    cir = taylorcircuit(n, blk)
     r = apply!(inreg,cir) |> focus!(1:n - nbit...,) |> select!(0)
-    return r, blk.C_tilda
+    return r, blk.N
 end

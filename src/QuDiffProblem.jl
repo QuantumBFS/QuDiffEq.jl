@@ -24,10 +24,10 @@ struct QuLDEProblem{uType,tType,isinplace, F, P, bType} <: QuODEProblem{uType,tT
         CPType = eltype(f.linmatrix)
         new{Array{CPType,1},typeof(tspan[1]),isinplace(f),typeof(f.linmatrix),Array{CPType,1}, false}(f.linmatrix,b,u0,tspan)
     end
-    function QuLDEProblem(A,u0::Array{G,1},tspan;kwargs...,) where {G}
+    function QuLDEProblem(A,b::Array{G,1},tspan;kwargs...,) where {G}
         f = QuODEFunction(A)
         CPType = eltype(f.linmatrix)
-        b = nothing
-        new{Array{CPType,1},typeof(tspan[1]),isinplace(f),typeof(f.linmatrix), typeof(b), true}(f.linmatrix,b,u0,tspan)
+        u0 = nothing
+        new{Nothing,typeof(tspan[1]),isinplace(f),typeof(f.linmatrix), Array{CPType,1}, true}(f.linmatrix,b,u0,tspan)
     end
 end
