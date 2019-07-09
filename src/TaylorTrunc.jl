@@ -145,21 +145,20 @@ end
 function unitary_decompose(H::Matrix)
     if isunitary(H)
         return H
-    else
-        Mu = H/opnorm(H)
-        CPType = eltype(H)
-        nbit, = size(H)
-        nbit = log2i(nbit)
-        B1 = convert(Array{CPType,2},1/2*(Mu + Mu'))
-        B2 = convert(Array{CPType,2},-im/2*(Mu - Mu'))
-        iden = Matrix{CPType}(I,size(B1))
-        F = Array{GeneralMatrixBlock{nbit,nbit,CPType,Array{CPType,2}},1}(undef,4)
-        F[1] = matblock(B1 + im*sqrt(iden - B1*B1))
-        F[2] = matblock(B1 - im*sqrt(iden - B1*B1))
-        F[3] = matblock(im*B2 - sqrt(iden - B2*B2))
-        F[4] = matblock(im*B2 + sqrt(iden - B2*B2))
-        return F
     end
+    Mu = H/opnorm(H)
+    nbit, = size(H)
+    nbit = log2i(nbit)
+    B1 = convert(typeof(H),1/2*(Mu + Mu'))
+    B2 = convert(typeof(H),-im/2*(Mu - Mu'))
+    iden = Matrix{eltype(H)}(I,size(B1))
+    F = Array{typeof(H),1}(undef,4)
+    F[1] = B1 + im*sqrt(iden - B1*B1)
+    F[2] = B1 - im*sqrt(iden - B1*B1)
+    F[3] = im*B2 - sqrt(iden - B2*B2)
+    F[4] = im*B2 + sqrt(iden - B2*B2)
+    return F
+
 end
 
 function calc_vt(::Type{CPType} = ComplexF32) where CPType
@@ -223,7 +222,7 @@ function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false}) w
     for i in 1:k
         for j in 0:2^l-1
             digits!(a,j,base = 2)
-            push!(cir, control(n, (i + c, -1*collect(k+1+c+(i-1)*l:k+1+c+i*l-1).*((-1*ones(Int, l)).^a)...,), (n - nbit + 1 : n...,)=>F[j+1]))
+            push!(cir, control(n, (i + c, -1*collect(k+1+c+(i-1)*l:k+1+c+i*l-1).*((-1*ones(Int, l)).^a)...,), (n - nbit + 1 : n...,)=>matblock(F[j+1])))
         end
     end
     return cir
