@@ -1,4 +1,4 @@
-export QuLDE, LDEMSAlgHHL
+export QuLDE, LDEMSAlgHHL, QuNLDE
 export QuEuler, QuLeapfrog, QuAB2, QuAB3, QuAB4
 
 abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
@@ -21,7 +21,7 @@ ref : arxiv.org/abs/0812.4423
 """
 struct QuNLDE <: QuODEAlgorithm
     k::Int
-    QuLDE(k = 3) = new(k)
+    QuNLDE(k = 3) = new(k)
 end
 
 """

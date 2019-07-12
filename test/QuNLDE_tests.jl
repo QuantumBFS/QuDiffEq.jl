@@ -5,6 +5,7 @@ using BitBasis
 using Random
 using Test
 using YaoBlocks
+using OrdinaryDiffEq
 
 #Linear Diff Equation Unitary M
 function f(du,u,p,t)
@@ -24,11 +25,17 @@ end
     A[5,6] = ComplexF32(-3)
     A[9,11] = ComplexF32(-1)
     A[9,7] = ComplexF32(-1)
-
-    qprob = QuLDEProblem(A, x, (0.0,0.1))
-    r,N = transformfunc(qprob.A, qprob.b, k)
+    tspan = (0.0,0.4)
+    qprob = QuLDEProblem(A, x, tspan)
+    r,N = func_transform(qprob.A, qprob.b, k)
     out = N*vec(state(r))
     r_out = zero(x)
     f(r_out, x,1,1)
-    @test isapprox.(r_out, out[2:3], atol = 1e-3) |> all
+    @test isapprox.(r_out, out[2:3]*sqrt(2), atol = 1e-3) |> all
+
+    prob = ODEProblem(f, x, tspan)
+    sol = solve(prob, Euler(), dt = 0.1, adaptive = false)
+    r_out = transpose(hcat(sol.u...))
+    out = solve(qprob, QuNLDE(5), dt = 0.1)
+    @test_broken isapprox.(r_out,real(out), atol = 1e-3) |> all
 end
