@@ -46,6 +46,7 @@ function euler_matrix_update(A::Matrix,b::Vector,nrm::Real)
     A = nrm^2*A
     A[1,1] = 1
     for i in 1:n
+        A[4*i+ 1, 1] = A[4*i+ 1, 1]/(nrm^2)
         @. A[4*i+ 1, 2:n+1] = A[4*i+ 1, 2:n+1]/nrm
         for j in 1:n
             A[4*i + 1, 4*j + 1] = A[4*i + 1, 4*j + 1]/nrm
@@ -58,6 +59,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
     A = prob.A
     b = prob.b
     k = alg.k
+    ϵ = alg.ϵ
     tspan = prob.tspan
     len = round(Int,(tspan[2] - tspan[1])/dt) + 1
     siz = length(b)
@@ -66,7 +68,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
     A = euler_matrix(A,b,dt)
     H = make_unitary(A)
     reg = make_input_vector(b)
-    r, N = nonlinear_transform(H,reg,k)
+    r, N = nonlinear_transform(H,reg,k,ϵ)
     ntem = 1
     for step in 2:len - 1
         tem = vec(state(r))*N*sqrt(2)
@@ -76,7 +78,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
         H = make_unitary(C)
         reg = res[step,:]/ntem
         reg = make_input_vector(reg)
-        r, N = nonlinear_transform(H,reg,k)
+        r, N = nonlinear_transform(H,reg,k,ϵ)
     end
     tem = vec(state(r))*N*sqrt(2)
     res[len,:] = tem[2:siz+1]

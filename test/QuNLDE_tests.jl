@@ -36,6 +36,6 @@ end
     prob = ODEProblem(f, x, tspan)
     sol = solve(prob, Euler(), dt = 0.1, adaptive = false)
     r_out = transpose(hcat(sol.u...))
-    out = solve(qprob, QuNLDE(5), dt = 0.1)
+    out = solve(qprob, QuNLDE(3), dt = 0.1)
     @test isapprox.(r_out,real(out), atol = 1e-3) |> all
 end
