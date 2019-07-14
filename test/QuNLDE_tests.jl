@@ -27,7 +27,7 @@ end
     A[9,7] = ComplexF32(-1)
     tspan = (0.0,0.4)
     qprob = QuLDEProblem(A, x, tspan)
-    r,N = func_transform(qprob.A, qprob.b, k)
+    r, N = func_transform(qprob.A, qprob.b, k)
     out = N*vec(state(r))
     r_out = zero(x)
     f(r_out, x,1,1)
@@ -37,5 +37,5 @@ end
     sol = solve(prob, Euler(), dt = 0.1, adaptive = false)
     r_out = transpose(hcat(sol.u...))
     out = solve(qprob, QuNLDE(5), dt = 0.1)
-    @test_broken isapprox.(r_out,real(out), atol = 1e-3) |> all
+    @test isapprox.(r_out,real(out), atol = 1e-3) |> all
 end
