@@ -16,7 +16,7 @@ function diffeqProblem(nbit::Int)
     Au,An,b, x
 end
 
-@testset "QuLDE_Test" begin
+@testset "TaylorTrunc_Test" begin
     Random.seed!(2)
     N = 1
     k = 3

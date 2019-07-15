@@ -22,5 +22,9 @@ end
 end
 
 @testset "QuDiffHHL_tests" begin
-    include("QuLDE_tests.jl")
+    include("QuDiffHHL_tests.jl")
+end
+
+@testset "TaylorTrunc_tests" begin
+    include("TaylorTrunc_tests.jl")
 end

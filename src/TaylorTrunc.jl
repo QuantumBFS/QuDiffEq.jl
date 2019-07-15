@@ -50,6 +50,7 @@ struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
     function TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T}) where {L,uType, tType, isinplace, F, P, T}
         CPType = eltype(prob.u0)
         opn = opnorm(prob.A)
+        u = isunitary(prob.A/opn)
         VS2 = nothing
         V = nothing
         VT = nothing
@@ -62,8 +63,6 @@ struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
             end
             N = D_tilda
             D_tilda = sqrt(D_tilda)
-
-            u = isunitary(prob.A/opn)
             rs = log2i(k+1)
             VS1 = calc_vs2(k,rs,prob.b,t, opn, D_tilda)
         else
@@ -96,15 +95,15 @@ struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
             V = CPType[C_tilda/N D_tilda/N; D_tilda/N -1*C_tilda/N]
             V = matblock(V)
         end
-        new{CPType, u, typeof(VS1), L, Array{CPType,2}, typeof(V), typeof(VS1), typeof(VS2),typeof(VT)}(k, t, H, 2, rs, C_tilda, D_tilda, N, V, VS1, VS2,VT)
+        new{CPType, u, L, Array{CPType,2}, typeof(V), typeof(VS1), typeof(VS2),typeof(VT)}(k, t, prob.A, 2, rs, C_tilda, D_tilda, N, V, VS1, VS2,VT)
     end
 end
 
 function calc_vs1(k::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
     CPType = eltype(x)
     VS1 = rand(CPType,2^k,2^k)
-    VS1[:,1] = zero(VS1[:,1])
-    for j in 0:k
+    @inbounds VS1[:,1] = zero(VS1[:,1])
+    @inbounds for j in 0:k
         VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j, x, opn, t,2))/C_tilda
     end
     VS1 = -1*qr(VS1).Q
@@ -113,8 +112,8 @@ end
 
 function calc_vs1(k::Int, rs::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
     CPType = eltype(x)
-    VS1 = rand(CPType,2^rs,2^rs)
-    for j in 0:k
+    @inbounds VS1 = rand(CPType,2^rs,2^rs)
+    @inbounds for j in 0:k
         VS1[j+1,1] = sqrt(C(j, x, opn, t,1))/C_tilda
     end
     VS1 = -1*qr(VS1).Q
@@ -122,10 +121,10 @@ function calc_vs1(k::Int, rs::Int, x::Vector, t::Real, opn::Real, C_tilda::T) wh
 end
 
 function calc_vs2(k::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
-    D(m) = norm(prob.b)*(opn*t)^(m-1)*t/factorial(m)
+    CPType = eltype(x)
     VS2 = rand(CPType,2^k,2^k)
-    VS2[:,1] = zero(VS2[:,1])
-    for j in 0:k-1
+    @inbounds VS2[:,1] = zero(VS2[:,1])
+    @inbounds for j in 0:k-1
         VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1, x, opn, t, 2))/D_tilda
     end
     VS2 = -1*qr(VS2).Q
@@ -133,8 +132,9 @@ function calc_vs2(k::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
 end
 
 function calc_vs2(k::Int, rs::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
+    CPType = eltype(x)
     VS2 = rand(CPType,2^rs,2^rs)
-    for j in 0:k - 1
+    @inbounds for j in 0:k - 1
         VS2[j+1,1] = sqrt(D(j+1, x, opn, t, 1))/D_tilda
     end
     VS2[k+1,1] = 0;
@@ -142,17 +142,17 @@ function calc_vs2(k::Int, rs::Int, x::Vector, t::Real, opn::Real, D_tilda::T) wh
     return VS2
 end
 
-function unitary_decompose(H::Matrix)
+function unitary_decompose(H::Array{T,2}) where T
     if isunitary(H)
         return H
     end
     Mu = H/opnorm(H)
     nbit, = size(H)
     nbit = log2i(nbit)
-    B1 = convert(typeof(H),1/2*(Mu + Mu'))
-    B2 = convert(typeof(H),-im/2*(Mu - Mu'))
-    iden = Matrix{eltype(H)}(I,size(B1))
-    F = Array{typeof(H),1}(undef,4)
+    B1 = convert(Array{T,2},1/2*(Mu + Mu'))
+    B2 = convert(Array{T,2},-im/2*(Mu - Mu'))
+    iden = Matrix{T}(I,size(B1))
+    F = Array{Array{T,2},1}(undef,4)
     F[1] = B1 + im*sqrt(iden - B1*B1)
     F[2] = B1 - im*sqrt(iden - B1*B1)
     F[3] = im*B2 - sqrt(iden - B2*B2)

@@ -30,4 +30,7 @@ struct QuLDEProblem{uType,tType,isinplace, F, P, bType} <: QuODEProblem{uType,tT
         u0 = nothing
         new{Nothing,typeof(tspan[1]),isinplace(f),typeof(f.linmatrix), Array{CPType,1}, true}(f.linmatrix,b,u0,tspan)
     end
+    function QuLDEProblem(A,b,u0::Array{G,1},tspan;kwargs...,) where {G}
+        new{Array{G,1},typeof(tspan[1]),true,typeof(A),typeof(b), false}(A,b,u0,tspan)
+    end
 end

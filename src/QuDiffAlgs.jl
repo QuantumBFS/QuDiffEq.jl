@@ -19,10 +19,10 @@ Linear differential equation solvers (non-HHL)
 
 ref : arxiv.org/abs/0812.4423
 """
-struct QuNLDE{T} <: QuODEAlgorithm
+struct QuNLDE <: QuODEAlgorithm
     k::Int
-    ϵ::T
-    QuNLDE(k = 3, ϵ = 1e-3) = new{typeof(ϵ)}(k,ϵ)
+    ϵ::Real
+    QuNLDE(k = 3, ϵ = 1e-3) = new(k,ϵ)
 end
 
 """

@@ -23,7 +23,7 @@ end
     M, v, x = diffeq_problem(N)
     A(t) = M
     b(t) = v
-    n_reg = 12
+    nreg = 12
     f(u,p,t) = M*u + v;
     prob = ODEProblem(f, x, tspan)
     qprob = QuLDEProblem(A, b, x, tspan)

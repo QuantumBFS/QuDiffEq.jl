@@ -46,7 +46,7 @@ struct QuLDEUnitParam{CPType, L, Q, VType <: GeneralMatrixBlock{1}, SType <: Gen
 
         VS1 = rand(CPType,k+1,k+1)
         VS2 = rand(CPType,k+1,k+1)
-        for j in 0:k
+        @inbounds for j in 0:k
             VS1[j+1,1] = sqrt(C(j))/C_tilda
             VS2[j+1,1] = sqrt(D(j+1))/D_tilda
         end
@@ -113,7 +113,7 @@ struct QuLDEnonUnitParam{CPType, L, Q, NL, Nbit, VType <: GeneralMatrixBlock{1},
         VS2 = rand(CPType,2^k,2^k)
         VS1[:,1] = zero(VS1[:,1])
         VS2[:,1] = zero(VS2[:,1])
-        for j in 0:k
+        @inbounds  for j in 0:k
             VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j))/C_tilda
             VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1))/D_tilda
         end
@@ -171,7 +171,7 @@ struct QuLDEProbParam{CPType, L, Q, NL, Nbit, SType <: GeneralMatrixBlock{Q}, LT
         #tested
         VS2 = rand(CPType,2^k,2^k)
         VS2[:,1] = zero(VS2[:,1])
-        for j in 0:k-1
+        @inbounds for j in 0:k-1
             VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1)/D_tilda)
         end
         VS2 = -1*qr(VS2).Q

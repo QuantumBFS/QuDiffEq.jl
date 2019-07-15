@@ -1,14 +1,13 @@
 export func_transform, euler_matrix, nonlinear_transform, make_input_vector, make_unitary
 
-function make_input_vector(x::Vector)
+function make_input_vector(x::Vector{T}) where T
     if !(norm(x) ≈ 1)
         throw(ArgumentError("Input vector is not normalized"))
     end
-    CPType = eltype(x)
     len = length(x)
     siz = nextpow(2,len + 1)
-    z = zeros(CPType, siz)
-    z[1] = CPType(1)
+    z = zeros(T, siz)
+    z[1] = one(T)
     z[2:len+1] = x
     normalize!(z)
     reg = [1,0] ⊗ z ⊗ z
@@ -35,7 +34,7 @@ function euler_matrix(A::Matrix,b::Vector,h::Real)
     n = length(b)
     A = h*A
     A[1,1] = 1
-    for i in 1:n
+    @inbounds for i in 1:n
         A[4*i+ 1, i+1] += 1
     end
     return A
@@ -45,7 +44,7 @@ function euler_matrix_update(A::Matrix,b::Vector,nrm::Real)
     n = length(b)
     A = nrm^2*A
     A[1,1] = 1
-    for i in 1:n
+    @inbounds for i in 1:n
         A[4*i+ 1, 1] = A[4*i+ 1, 1]/(nrm^2)
         @. A[4*i+ 1, 2:n+1] = A[4*i+ 1, 2:n+1]/nrm
         for j in 1:n
@@ -70,7 +69,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
     reg = make_input_vector(b)
     r, N = nonlinear_transform(H,reg,k,ϵ)
     ntem = 1
-    for step in 2:len - 1
+    @views for step in 2:len - 1
         tem = vec(state(r))*N*sqrt(2)
         res[step,:] = tem[2:siz+1]
         ntem = norm(res[step,:])
@@ -81,6 +80,6 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
         r, N = nonlinear_transform(H,reg,k,ϵ)
     end
     tem = vec(state(r))*N*sqrt(2)
-    res[len,:] = tem[2:siz+1]
+    @views res[len,:] = tem[2:siz+1]
     return res
 end
