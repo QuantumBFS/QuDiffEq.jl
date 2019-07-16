@@ -48,7 +48,7 @@ struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
     end
 
     function TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T}) where {L,uType, tType, isinplace, F, P, T}
-        CPType = eltype(prob.u0)
+        CPType = eltype(prob.b)
         opn = opnorm(prob.A)
         u = isunitary(prob.A/opn)
         VS2 = nothing
@@ -228,7 +228,7 @@ function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false}) w
     return cir
 end
 
-circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'))
+circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'), put(1=>blk.V))
 circuit_final(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs,blk.VS1'))
 
 function circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, false}) where CPType
@@ -236,6 +236,7 @@ function circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, false}) where CP
     for i in 1:blk.k
         push!(cir, lc(n,c,i,blk.k,blk.l,blk.VT'))
     end
+    push!(cir,put(1=>blk.V))
     return cir
 end
 
