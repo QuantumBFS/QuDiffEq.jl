@@ -26,6 +26,6 @@ prob = ODEProblem(f,u0,tspan)
 
 qsol = solve(prob,QuLDE(k),dt = h)
 sol = solve(prob,Tsit5(),dt = h,adaptive = false)
-v = transpose(hcat(sol.u...))
+r_out = transpose(hcat(sol.u...))
 
-@test isapprox.(v,qsol, atol = 1e-3) |> all
+@test isapprox.(r_out,qsol, atol = 1e-3) |> all

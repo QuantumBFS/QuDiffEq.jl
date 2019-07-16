@@ -47,6 +47,12 @@ end
     # u0 equal to zero
     tspan = (0.0,0.1)
 
+    qprob = QuLDEProblem(Au,b,tspan)
+    out = solve(qprob,QuLDE(k))
+    t = tspan[2] - tspan[1]
+    r_out = (exp(Au*t) - Diagonal(ones(length(b))))*Au^(-1)*b
+    @test isapprox.(r_out, out, atol = 1e-3) |> all
+
     qprob = QuLDEProblem(An,b,tspan)
     out = solve(qprob,QuLDE(k))
     t = tspan[2] - tspan[1]
