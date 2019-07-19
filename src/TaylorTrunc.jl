@@ -168,9 +168,9 @@ function calc_vt(::Type{CPType} = ComplexF32) where CPType
     return VT
 end
 
-v(n::Int,c::Int, T::Int, V::AbstractMatrix) = put(n, (c + 1:T + c...,)=>matblock(V))
+v(n::Int,c::Int, T::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (c + 1:T + c...,))
 v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) = control(n, j,(1 + c:T + c...,)=>matblock(V))
-lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = put(n, (k+c+1+(i-1)*l:k+1+c+i*l-1) => matblock(V))
+lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (k+c+1+(i-1)*l:k+1+c+i*l-1...,))
 
 circuit_init(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c,(-1,), blk.rs, blk.VS1),v(n, c, (1,), blk.rs, blk.VS2))
 circuit_init(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs, blk.VS1))
