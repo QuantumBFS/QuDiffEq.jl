@@ -27,7 +27,7 @@ end
     f(u,p,t) = Au*u + b;
     prob = ODEProblem(f, x, tspan)
 
-    sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
+    sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
     s = sol.u[end]
 
     out = solve(qprob, QuLDE(k))
@@ -38,9 +38,24 @@ end
     f(u,p,t) = An*u + b;
     prob = ODEProblem(f, x, tspan)
 
-    sol = solve(prob, Tsit5(), dt = 0.1, adaptive = :false)
+    sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
     s = sol.u[end]
 
     out = solve(qprob, QuLDE(k))
     @test isapprox.(s, out, atol = 0.02) |> all
+
+    # u0 equal to zero
+    tspan = (0.0,0.1)
+
+    qprob = QuLDEProblem(Au,b,tspan)
+    out = solve(qprob,QuLDE(k))
+    t = tspan[2] - tspan[1]
+    r_out = (exp(Au*t) - Diagonal(ones(length(b))))*Au^(-1)*b
+    @test isapprox.(r_out, out, atol = 1e-3) |> all
+
+    qprob = QuLDEProblem(An,b,tspan)
+    out = solve(qprob,QuLDE(k))
+    t = tspan[2] - tspan[1]
+    r_out = (exp(An*t) - Diagonal(ones(length(b))))*An^(-1)*b
+    @test isapprox.(r_out, out, atol = 1e-3) |> all
 end

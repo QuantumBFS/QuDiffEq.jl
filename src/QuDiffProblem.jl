@@ -11,17 +11,26 @@ end
 
 abstract type QuODEProblem{uType,tType,isinplace} <: DiffEqBase.AbstractODEProblem{uType,tType,isinplace} end
 
-struct QuLDEProblem{uType,tType,isinplace, F, P} <: QuODEProblem{uType,tType,isinplace}
+struct QuLDEProblem{uType,tType,isinplace, F, P, bType} <: QuODEProblem{uType,tType,isinplace}
     A::F
     b::P
     u0::uType
     tspan::Tuple{tType,tType}
-    function QuLDEProblem(A::QuODEFunction{iip,CPType},b::Array{T,1},u0::Array{G,1},tspan;kwargs...) where {iip,CPType,T,G}
-        new{Array{CPType,1},typeof(tspan),iip,typeof(A.linmatrix),Array{CPType,1}}(A.linmatrix,b,u0,tspan)
+    function QuLDEProblem(A::QuODEFunction{iip,CPType},b::Array{T,1},u0::Array{G,1},tspan,::Type{bType} = false;kwargs...) where {iip,CPType,T,G,bType}
+        new{Array{CPType,1},typeof(tspan),iip,typeof(A.linmatrix),Array{CPType,1},bType}(A.linmatrix,b,u0,tspan)
     end
     function QuLDEProblem(A,b::Array{T,1},u0::Array{G,1},tspan;kwargs...,) where {T,G}
         f = QuODEFunction(A)
         CPType = eltype(f.linmatrix)
-        new{Array{CPType,1},typeof(tspan[1]),isinplace(f),typeof(f.linmatrix),Array{CPType,1}}(f.linmatrix,b,u0,tspan)
+        new{Array{CPType,1},typeof(tspan[1]),isinplace(f),typeof(f.linmatrix),Array{CPType,1}, false}(f.linmatrix,b,u0,tspan)
+    end
+    function QuLDEProblem(A,b::Array{G,1},tspan;kwargs...,) where {G}
+        f = QuODEFunction(A)
+        CPType = eltype(f.linmatrix)
+        u0 = nothing
+        new{Nothing,typeof(tspan[1]),isinplace(f),typeof(f.linmatrix), Array{CPType,1}, true}(f.linmatrix,b,u0,tspan)
+    end
+    function QuLDEProblem(A,b,u0::Array{G,1},tspan;kwargs...,) where {G}
+        new{Array{G,1},typeof(tspan[1]),true,typeof(A),typeof(b), false}(A,b,u0,tspan)
     end
 end

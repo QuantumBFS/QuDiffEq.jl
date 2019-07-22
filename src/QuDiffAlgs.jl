@@ -1,20 +1,28 @@
-export QuLDE, LDEMSAlgHHL
+export QuLDE, LDEMSAlgHHL, QuNLDE
 export QuEuler, QuLeapfrog, QuAB2, QuAB3, QuAB4
 
 abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 
 abstract type LDEMSAlgHHL <: QuODEAlgorithm end
-
 """
 Linear differential equation solvers (non-HHL)
 
 ref : arxiv.org/abs/1807.04553
 """
 
-struct QuLDE{T} <: QuODEAlgorithm
+struct QuLDE <: QuODEAlgorithm
     k::Int
-    Δu::Array{T,1}
-    QuLDE(k = 3,Δu = [1e-6,1e-6]) = new{eltype(Δu)}(k,Δu)
+    QuLDE(k = 3) = new(k)
+end
+"""
+Linear differential equation solvers (non-HHL)
+
+ref : arxiv.org/abs/0812.4423
+"""
+struct QuNLDE <: QuODEAlgorithm
+    k::Int
+    ϵ::Real
+    QuNLDE(k = 3, ϵ = 1e-3) = new(k,ϵ)
 end
 
 """

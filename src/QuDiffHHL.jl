@@ -93,7 +93,7 @@ function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::
     C_value = minimum(eigvals(matx) .|> abs)*0.01;
     matx = 1/(λ*2)*matx
     initstate = initstate*1/(2*λ) |> normalize!
-    res = hhlsolve(matx,initstate, n_reg, C_value)
+    res = hhlsolve(matx,initstate, nreg, C_value)
     res = res/λ
     return res
 end;
