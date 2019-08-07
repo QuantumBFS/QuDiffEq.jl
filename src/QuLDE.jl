@@ -15,57 +15,84 @@ export quldecircuit
     * quldecircuit() - generates qunatum cicuit
 
 """
-function quldecircuit(n,c,blk)
-    circinit = circuit_init(n,c,blk)
-    circmid = circuit_intermediate(n,c,blk)
-    circfin =circuit_final(n,c,blk)
+function quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix)
+    C_tilda = blk.C_tilda
+    D_tilda = blk.D_tilda
+    N = blk.N
+    circinit = circuit_ends(n,blk,VS1,VS2)
+    circmid = circuit_intermediate(n,1,blk)
+    circfin =circuit_ends(n,blk,VS1',VS2')
+    CPType = eltype(blk.H)
+    V = CPType[C_tilda/N D_tilda/N; D_tilda/N -1*C_tilda/N]
+    V = matblock(V)
+    push!(circfin,put(1=>V))
+    return chain(circinit, circmid,circfin)
+end
+
+function quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix,VT::AbstractMatrix)
+    C_tilda = blk.C_tilda
+    D_tilda = blk.D_tilda
+    N = blk.N
+    circinit = circuit_ends(n,blk,VS1,VS2,VT)
+    circmid = circuit_intermediate(n,1,blk)
+    circfin =circuit_ends(n,blk,VS1',VS2',VT')
+    CPType = eltype(blk.H)
+    V = CPType[C_tilda/N D_tilda/N; D_tilda/N -1*C_tilda/N]
+    V = matblock(V)
+    push!(circfin,put(1=>V))
     return chain(circinit, circmid,circfin)
 end
 
 function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P, false}, alg::QuLDE; kwargs...) where {uType,tType,isinplace, F, P}
+    opn = opnorm(prob.A)
     b = prob.b
     t = prob.tspan[2] - prob.tspan[1]
     x = prob.u0
     nbit = log2i(length(b))
     k = alg.k
+    CPType = eltype(x)
     blk = TaylorParam(k,t,prob)
+    VS1 = calc_vs1(blk,x,opn)
+    VS2 = calc_vs2(blk,b,opn)
     rs = blk.rs
     l = blk.l
-    c = 1
     if rs !=k
         n = 1 + rs + nbit
-        CPType = get_param_type(blk)
         inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,rs) ⊗ ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) ) +  ArrayReg(b/norm(b)) ⊗ zero_state(CPType, rs) ⊗ ((blk.D_tilda/blk.N) * ArrayReg(CPType, bit"1") )
+        cir = quldecircuit(n,blk,VS1,VS2)
     else
         n = 1 + k*(1 + l) + nbit
-        CPType = get_param_type(blk)
+        VT = calc_vt(CPType)
         inreg = ArrayReg(x/norm(x))⊗ zero_state(CPType, k*l)  ⊗ zero_state(CPType, k) ⊗ ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) )+  ArrayReg(b/norm(b)) ⊗ zero_state(CPType, k*l) ⊗ zero_state(CPType, k) ⊗ ((blk.D_tilda/blk.N) * ArrayReg(CPType, bit"1") )
+        cir = quldecircuit(n,blk,VS1,VS2,VT)
     end
-    cir = quldecircuit(n,c,blk)
+
     res = apply!(inreg,cir) |> focus!(1:n - nbit...,) |> select!(0) |> state
     out = (blk.N^2)*(vec(res))
     return out
-end;
+end
 
 function DiffEqBase.solve(prob::QuLDEProblem{uType, tType, isinplace, F, P, true}, alg::QuLDE; kwargs...) where {uType, tType, isinplace, F, P}
-    M = prob.A
+    opn = opnorm(prob.A)
     b = prob.b
     t = prob.tspan[2] - prob.tspan[1]
     k = alg.k
     nbit = log2i(length((b)))
     blk = TaylorParam(k,t,prob)
+    CPType = eltype(b)
+    VS2 = calc_vs2(blk,b,opn)
     l = blk.l
     rs = blk.rs
     if rs !=k
         n = rs + nbit
-        CPType = get_param_type(blk)
         inreg = ArrayReg(b/norm(b)) ⊗ zero_state(CPType, rs)
+        cir = taylorcircuit(n,blk,VS2)
     else
         n = k*(1 + l) + nbit
-        CPType = get_param_type(blk)
         inreg = ArrayReg(b/norm(b)) ⊗ zero_state(CPType, k*l) ⊗ zero_state(CPType, k)
+        VT = calc_vt(CPType)
+        cir = taylorcircuit(n,blk,VS2,VT)
     end
-    cir = taylorcircuit(n,blk)
     r = apply!(inreg,cir) |> focus!(1:n - nbit...,) |> select!(0) |> state
     out = blk.N * vec(r)
     return out
