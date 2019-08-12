@@ -1,4 +1,4 @@
-export func_transform, euler_matrix, nonlinear_transform, make_input_vector, make_unitary
+export func_transform, euler_matrix,euler_matrix_update, nonlinear_transform, make_input_vector, make_unitary
 
 function make_input_vector(x::Vector{T}) where T
     if !(norm(x) ≈ 1)
@@ -30,9 +30,9 @@ function func_transform(A::Matrix, x::Vector, k::Int,ϵ::Real = 1e-4)
     r, N = nonlinear_transform(H,reg,k,ϵ)
     return r, N
 end
-function euler_matrix(A::Matrix,b::Vector,h::Real)
+function euler_matrix(A::Matrix{CPType},b::Vector{CPType},h::Real) where CPType
     n = length(b)
-    A = h*A
+    A = CPType(h)*A
     A[1,1] = 1
     @inbounds for i in 1:n
         A[4*i+ 1, i+1] += 1
@@ -40,9 +40,9 @@ function euler_matrix(A::Matrix,b::Vector,h::Real)
     return A
 end
 
-function euler_matrix_update(A::Matrix,b::Vector,nrm::Real)
+function euler_matrix_update(A::Matrix{CPType}, b::Vector{CPType}, nrm::Real) where CPType
     n = length(b)
-    A = nrm^2*A
+    A = CPType(nrm^2)*A
     A[1,1] = 1
     @inbounds for i in 1:n
         A[4*i+ 1, 1] = A[4*i+ 1, 1]/(nrm^2)

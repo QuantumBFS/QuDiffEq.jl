@@ -1,10 +1,11 @@
 export TaylorParam
-export taylorcircuit, get_param_type, taylorsolve, circuit_init, circuit_final, circuit_intermediate
+export taylorcircuit, taylorsolve, circuit_ends, circuit_intermediate
 export v,lc
+#export get_param_type, circuit_final
 
 const C(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m)/factorial(m)
 const D(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m-1)*t/factorial(m)
-struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
+struct TaylorParam{CPType, UType, L, HM}
     k::Int # Taylor expansion upto k
     t::L
     H::HM
@@ -13,131 +14,95 @@ struct TaylorParam{CPType, UType, L, HM, VType, S1Type, S2Type, WType}
     C_tilda::CPType
     D_tilda::CPType
     N::CPType
-    V::VType
-    VS1::S1Type # Q is input size of GMblock
-    VS2::S2Type
-    VT::WType
-
     function TaylorParam(k::Int, t::L, H::Matrix, x::Array{CPType,1}) where {L,CPType}
         opn = opnorm(H)
         u = isunitary(H/opn)
-        VT = nothing
         C_tilda = 0
         if u
-            for i in 0:k
-                C_tilda = C_tilda + C(i, x, opn,t,1)
-            end
-            N = C_tilda
-            C_tilda = sqrt(C_tilda)
+            c = 1
             rs = log2i(k+1)
-            VS1 = calc_vs1(k,rs,x,t,opn, C_tilda)
             l = 0
         else
-            for i in 0:k
-                C_tilda = C_tilda + C(i, x, opn,t,2)
-            end
-            N = C_tilda
-            C_tilda = sqrt(C_tilda)
+            c = 2
             rs = k
             l = 2
-            VT = calc_vt(CPType)
-            VS1 = calc_vs1(k,x,t,opn, C_tilda)
         end
 
-        new{CPType, u, L, Array{CPType,2}, Nothing, typeof(VS1), Nothing, typeof(VT)}(k, t, H, l, rs, C_tilda, zero(C_tilda), N, nothing, VS1, nothing,VT)
+        for i in 0:k
+            C_tilda = C_tilda + C(i, x, opn,t,c)
+        end
+        N = C_tilda
+        C_tilda = sqrt(C_tilda)
+        new{CPType, u, L, Array{CPType,2}}(k, t, H, l, rs, C_tilda, zero(C_tilda), N)
     end
 
     function TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T}) where {L,uType, tType, isinplace, F, P, T}
-        CPType = eltype(prob.b)
+        CPType = eltype(prob.A)
         opn = opnorm(prob.A)
         u = isunitary(prob.A/opn)
-        VS2 = nothing
-        V = nothing
-        VT = nothing
         D_tilda = 0
         C_tilda = 0
-
         if u
-            for i in 1:k
-                D_tilda = D_tilda + D(i, prob.b, opn,t,1)
-            end
-            N = D_tilda
-            D_tilda = sqrt(D_tilda)
+            c = 1
             rs = log2i(k+1)
-            VS1 = calc_vs2(k,rs,prob.b,t, opn, D_tilda)
+            l = 0
         else
-            for i in 1:k
-                D_tilda = D_tilda + D(i, prob.b, opn,t,2)
-            end
-            N = D_tilda
-            D_tilda = sqrt(D_tilda)
-            VT = calc_vt(CPType)
-            u = isunitary(prob.A/opn)
+            c = 2
             rs = k
-            VS1 = calc_vs2(k,prob.b,t, opn, D_tilda)
+            l = 2
         end
+        for i in 1:k
+            D_tilda = D_tilda + D(i, prob.b, opn,t,c)
+        end
+        N = D_tilda
+        D_tilda = sqrt(D_tilda)
         if !(T)
-            VS2 = VS1
-            if u
-                for i in 0:k
-                    C_tilda = C_tilda + C(i, prob.u0, opn, t,1)
-                end
-                C_tilda = sqrt(C_tilda)
-                VS1 = calc_vs1(k,rs,prob.u0,t, opn, C_tilda)
-            else
-                for i in 0:k
-                    C_tilda = C_tilda + C(i, prob.u0, opn, t,2)
-                end
-                C_tilda = sqrt(C_tilda)
-                VS1 = calc_vs1(k,prob.u0,t, opn, C_tilda)
+            for i in 0:k
+                C_tilda = C_tilda + C(i, prob.u0, opn, t,c)
             end
+            C_tilda = sqrt(C_tilda)
             N = sqrt(C_tilda^2 + D_tilda^2)
-            V = CPType[C_tilda/N D_tilda/N; D_tilda/N -1*C_tilda/N]
-            V = matblock(V)
         end
-        new{CPType, u, L, Array{CPType,2}, typeof(V), typeof(VS1), typeof(VS2),typeof(VT)}(k, t, prob.A, 2, rs, C_tilda, D_tilda, N, V, VS1, VS2,VT)
+        new{CPType, u, L, Array{CPType,2}}(k, t, prob.A, l, rs, C_tilda, D_tilda, N)
     end
 end
 
-function calc_vs1(k::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
-    CPType = eltype(x)
-    VS1 = rand(CPType,2^k,2^k)
+function calc_vs1(blk::TaylorParam, x::Vector{CPType}, opn::Real) where CPType
+    k = blk.k
+    rs = blk.rs
+    t = blk.t
+    C_tilda = blk.C_tilda
+    VS1 = rand(CPType,2^rs,2^rs)
     @inbounds VS1[:,1] = zero(VS1[:,1])
-    @inbounds for j in 0:k
-        VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j, x, opn, t,2))/C_tilda
+    if rs == k
+        @inbounds for j in 0:k
+            VS1[(2^k - 2^(k-j) + 1),1] = sqrt(C(j, x, opn, t,2))/C_tilda
+        end
+    else
+        @inbounds for j in 0:k
+            VS1[j+1,1] = sqrt(C(j, x, opn, t,1))/C_tilda
+        end
     end
     VS1 = -1*qr(VS1).Q
     return VS1
 end
 
-function calc_vs1(k::Int, rs::Int, x::Vector, t::Real, opn::Real, C_tilda::T) where T
-    CPType = eltype(x)
-    @inbounds VS1 = rand(CPType,2^rs,2^rs)
-    @inbounds for j in 0:k
-        VS1[j+1,1] = sqrt(C(j, x, opn, t,1))/C_tilda
-    end
-    VS1 = -1*qr(VS1).Q
-    return VS1
-end
-
-function calc_vs2(k::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
-    CPType = eltype(x)
-    VS2 = rand(CPType,2^k,2^k)
-    @inbounds VS2[:,1] = zero(VS2[:,1])
-    @inbounds for j in 0:k-1
-        VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1, x, opn, t, 2))/D_tilda
-    end
-    VS2 = -1*qr(VS2).Q
-    return VS2
-end
-
-function calc_vs2(k::Int, rs::Int, x::Vector, t::Real, opn::Real, D_tilda::T) where T
-    CPType = eltype(x)
+function calc_vs2(blk::TaylorParam, x::Vector{CPType}, opn::Real) where CPType
+    k = blk.k
+    rs = blk.rs
+    t = blk.t
+    D_tilda = blk.D_tilda
     VS2 = rand(CPType,2^rs,2^rs)
-    @inbounds for j in 0:k - 1
-        VS2[j+1,1] = sqrt(D(j+1, x, opn, t, 1))/D_tilda
+    @inbounds VS2[:,1] = zero(VS2[:,1])
+    if rs == k
+        @inbounds for j in 0:k-1
+            VS2[(2^k - 2^(k-j) + 1),1] = sqrt(D(j+1, x, opn, t, 2))/D_tilda
+        end
+    else
+        @inbounds for j in 0:k - 1
+            VS2[j+1,1] = sqrt(D(j+1, x, opn, t, 1))/D_tilda
+        end
     end
-    VS2[k+1,1] = 0;
     VS2 = -1*qr(VS2).Q
     return VS2
 end
@@ -172,21 +137,21 @@ v(n::Int,c::Int, T::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (c + 1
 v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) = control(n, j,(1 + c:T + c...,)=>matblock(V))
 lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (k+c+1+(i-1)*l:k+1+c+i*l-1...,))
 
-circuit_init(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c,(-1,), blk.rs, blk.VS1),v(n, c, (1,), blk.rs, blk.VS2))
-circuit_init(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs, blk.VS1))
+circuit_ends(n::Int, blk::TaylorParam{CPType, true}, VS1::AbstractMatrix, VS2::AbstractMatrix) where CPType = chain(n, v(n, 1,(-1,), blk.rs, VS1),v(n, 1, (1,), blk.rs, VS2))
+circuit_ends(n::Int, blk::TaylorParam{CPType, true}, VS1::AbstractMatrix) where CPType = chain(n, v(n, 0, blk.rs, VS1))
 
-function circuit_init(n::Int,c::Int, blk::TaylorParam{CPType, false}) where CPType
-    cir = chain(n, v(n, c,(-1,), blk.rs, blk.VS1),v(n, c, (1,), blk.rs, blk.VS2))
+function circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatrix, VS2::AbstractMatrix, VT::AbstractMatrix) where CPType
+    cir = chain(n, v(n, 1, (-1,), blk.rs, VS1),v(n, 1, (1,),blk.rs, VS2))
     for i in 1:blk.k
-        push!(cir, lc(n, c, i, blk.k, blk.l, blk.VT))
+        push!(cir, lc(n,1,i,blk.k,blk.l,VT))
     end
     return cir
 end
 
-function circuit_init(n::Int, blk::TaylorParam{CPType, false}) where CPType
-    cir = chain(n, v(n, 0, blk.rs, blk.VS1))
+function circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatrix, VT::AbstractMatrix) where CPType
+    cir = chain(n, v(n, 0, blk.rs,VS1))
     for i in 1:blk.k
-        push!(cir, lc(n, 0, i, blk.k, blk.l, blk.VT))
+        push!(cir, lc(n,0,i,blk.k,blk.l,VT))
     end
     return cir
 end
@@ -228,52 +193,38 @@ function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false}) w
     return cir
 end
 
-circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'), put(1=>blk.V))
-circuit_final(n::Int, blk::TaylorParam{CPType, true}) where CPType = chain(n, v(n, 0, blk.rs,blk.VS1'))
-
-function circuit_final(n::Int, c::Int, blk::TaylorParam{CPType, false}) where CPType
-    cir = chain(n, v(n, c, (-1,), blk.rs, blk.VS1'),v(n, c, (1,),blk.rs, blk.VS2'))
-    for i in 1:blk.k
-        push!(cir, lc(n,c,i,blk.k,blk.l,blk.VT'))
-    end
-    push!(cir,put(1=>blk.V))
-    return cir
-end
-
-function circuit_final(n::Int, blk::TaylorParam{CPType, false}) where CPType
-    cir = chain(n, v(n, 0, blk.rs,blk.VS1'))
-    for i in 1:blk.k
-        push!(cir, lc(n,0,i,blk.k,blk.l,blk.VT'))
-    end
-    return cir
-end
-
-get_param_type(blk::TaylorParam{CPType}) where {CPType} = CPType
-
-function taylorcircuit(n::Int, blk::TaylorParam)
-    circinit = circuit_init(n,blk)
+function taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix)
+    circinit = circuit_ends(n,blk,VS1)
     circmid = circuit_intermediate(n,0,blk)
-    circfin =circuit_final(n,blk)
+    circfin =circuit_ends(n,blk,VS1')
     return chain(circinit, circmid, circfin)
 end
 
-function taylorsolve(H::Matrix, x::Vector, k::Int, t::Real)
+function taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix, VT::Matrix)
+    circinit = circuit_ends(n,blk,VS1,VT)
+    circmid = circuit_intermediate(n,0,blk)
+    circfin =circuit_ends(n,blk,VS1',VT')
+    return chain(circinit, circmid, circfin)
+end
 
+function taylorsolve(H::Array{CPType,2}, x::Vector{CPType}, k::Int, t::Real) where CPType
+    opn = opnorm(H)
     nbit = log2i(length(x))
     blk = TaylorParam(k,t,H,x)
-    CPType = get_param_type(blk)
+    VS1 = calc_vs1(blk,x,opn)
     rs = blk.rs
     k = blk.k
     l = blk.l
     if rs != k
         n = rs + nbit
         inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,rs)
+        cir = taylorcircuit(n, blk, VS1)
     else
         n = k*(1 + l) + nbit
-        CPType = get_param_type(blk)
-        inreg = ArrayReg(x/norm(x))⊗ zero_state(CPType, k*l)  ⊗ zero_state(CPType, k)
+        VT = calc_vt(CPType)
+        inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType, k*l)  ⊗ zero_state(CPType, k)
+        cir = taylorcircuit(n, blk, VS1, VT)
     end
-    cir = taylorcircuit(n, blk)
     r = apply!(inreg,cir) |> focus!(1:n - nbit...,) |> select!(0)
     return r, blk.N
 end
