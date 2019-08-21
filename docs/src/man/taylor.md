@@ -34,7 +34,7 @@ The vectors ``x(0)`` and ``b`` are encoded as state - ``|x(0)\rangle = \sum_{i} 
 ```math
 |x(t)\rangle \approx \sum^{k}_{m=0}\frac{||x(0)||(||M||t)^{m}}{m!}\mathcal{M}^{m}|x(0)\rangle + \sum^{k-1}_{n=1}\frac{||b||(||M||t)^{n-1}t}{n!}\mathcal{M}^{n-1}|b\rangle
 ```
-The circuit effects this transformations of the input state to obtain ``x(t)``.
+The `quldecircuit` effects this transformation on the input state to obtain ``x(t)``.
 
 ```@autodocs
 Modules = [QuDiffEq]
@@ -43,7 +43,9 @@ Pages  = ["QuLDE.jl"]
 
 ## Quantum non-linear differential equation
 
-The non-linear solver constitutes two sub-routines. Firstly, the function transform sub-routine, which employs of the `taylorcircuit`. Secondly, the forward Euler method.
+The non-linear solver constitutes two sub-routines.
+Firstly, the function transform sub-routine, which employs of the `taylorcircuit`. The function transform lets us map ``z`` to ``P(z)``, where ``P`` is a quadratic polynomial.
+Secondly, the forward Euler method.
 
 ```@autodocs
 Modules = [QuDiffEq]

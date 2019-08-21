@@ -21,7 +21,9 @@ Firstly, we need to define a `QuLDEProblem` for matrix `M` (may be time dependen
 
 ```@example lin
 using QuDiffEq
+using OrdinaryDiffEq, Test
 using Random
+using LinearAlgebra
 
 siz = 2
 M = rand(ComplexF64,siz,siz)
@@ -38,12 +40,11 @@ res = solve(qprob,alg)
 ```
 Let's compare the result with a `Tsit5()` from `OrdinaryDiffEq`
 ```@example lin
-using OrdinaryDiffEq, Test
 f(u,p,t) = M*u + b;
 prob = ODEProblem(f, x, tspan)
 
 sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 s = sol.u[end]
-@test isapprox.(s, out, atol = 0.02) |> all
+@test isapprox.(s, res, atol = 0.02) |> all
 ```
 Note : `QuLDE` works only with constant `M` and `b`. There is no such restriction on the other algorithms.

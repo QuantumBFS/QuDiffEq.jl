@@ -12,9 +12,12 @@ Let's say we want to solve the following set of differential equations.
 Let's take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.
 ```@example nonlin
 using QuDiffEq
+using OrdinaryDiffEq
 using Random
+using LinearAlgebra
+
 tspan = (0.0,0.4)
-x = rand(2)
+x = normalize!(rand(2))
 ```
 
 - For `QuNLDE`, we need to define a `<: QuODEProblem`. At present, we use only `QuLDEProblem` as a Qu problem wrapper.
@@ -33,7 +36,7 @@ A[9,7] = ComplexF32(-1);
 ```
 
 ```@example nonlin
-qprob1 = QuLDEProblem(A,x,tspan)
+qprob = QuLDEProblem(A,x,tspan)
 
 ```
 To solve the problem we use `solve()`
@@ -43,9 +46,8 @@ res = solve(qprob,QuNLDE(), dt = 0.1)
 Comparing the result with `Euler()`
 
 ```@example nonlin
-using OrdinaryDiffEq
 
-f(du,u,p,t)
+function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
     du[2] = -u[2]^2 - u[1]*u[2]
 end

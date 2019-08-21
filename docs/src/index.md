@@ -16,7 +16,7 @@
 ```@contents
 Pages = [
     "tutorial/lin.md",
-    "tutorial/nlin.md",
+    "tutorial/nlin.md"
 ]
 Depth = 2
 ```
@@ -26,7 +26,7 @@ Depth = 2
 ```@contents
 Pages = [
     "man/algs.md"
-    "man/taylor.md",
+    "man/taylor.md"
 ]
 Depth = 2
 ```
