@@ -1,19 +1,8 @@
 export quldecircuit
 """
-    Based on :  arxiv.org/abs/1807.04553
+    quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix) -> ChainBlock{n}
 
-    * Uses Taylor expansion
-
-    x' = Ax + b
-
-    * A - input matrix.
-    * b - input vector.
-    * x - inital vector
-    * t - time to be evaluated at
-
-    * Consists of two parts: A is unitary - QuLDEUnitParam() & A is non unitary - QuLDEnonUnitParam()
-    * quldecircuit() - generates qunatum cicuit
-
+Generates circuit for solving linear differental equations for a unitary H input.
 """
 function quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix)
     C_tilda = blk.C_tilda
@@ -29,6 +18,11 @@ function quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractM
     return chain(circinit, circmid,circfin)
 end
 
+"""
+    quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix,VT::AbstractMatrix) -> ChainBlock{n}
+
+Generates circuit for solving linear differental equations for a non-unitary H input.
+"""
 function quldecircuit(n::Int,blk::TaylorParam,VS1::AbstractMatrix,VS2::AbstractMatrix,VT::AbstractMatrix)
     C_tilda = blk.C_tilda
     D_tilda = blk.D_tilda

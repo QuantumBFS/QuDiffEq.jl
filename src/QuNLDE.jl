@@ -1,5 +1,9 @@
-export func_transform, euler_matrix,euler_matrix_update, nonlinear_transform, make_input_vector, make_unitary
+export func_transform, euler_matrix,euler_matrix_update, nonlinear_transform, make_input_vector, make_hermitian
+"""
+    make_input_vector(x::Vector{T}) -> Vector{T}
 
+Generates input vector for `QuNLDE` iterations.
+"""
 function make_input_vector(x::Vector{T}) where T
     if !(norm(x) ≈ 1)
         throw(ArgumentError("Input vector is not normalized"))
@@ -14,7 +18,19 @@ function make_input_vector(x::Vector{T}) where T
     return reg
 end
 
-make_unitary(A::Matrix) = [zero(A) im*A'; -im*A zero(A)]
+"""
+    make_hermitian(A::Matrix) -> Matrix
+
+Returns hermitian matrix containing A.
+"""
+function make_hermitian(A::Matrix)
+    if ishermitian(A)
+        return A
+    end
+
+    return [zero(A) im*A'; -im*A zero(A)]
+end
+
 
 function nonlinear_transform(H::Matrix, x::Vector, k::Int, ϵ::Real = 1e-4)
     r, N = taylorsolve(im*H,x,k,ϵ)
@@ -24,12 +40,23 @@ function nonlinear_transform(H::Matrix, x::Vector, k::Int, ϵ::Real = 1e-4)
     return r,sqrt(2)*N/ϵ
 end
 
+"""
+    func_transform(A::Matrix, x::Vector, k::Int) -> ArrayReg, <: Complex
+
+Function transform sub-routine. Returns state register and inverse probability of finding  it.
+"""
 function func_transform(A::Matrix, x::Vector, k::Int,ϵ::Real = 1e-4)
     reg = make_input_vector(x)
-    H = make_unitary(A)
+    H = make_hermitian(A)
     r, N = nonlinear_transform(H,reg,k,ϵ)
     return r, N
 end
+
+"""
+    euler_matrix(A::Matrix{CPType},b::Vector{CPType},h::Real) -> Matrix
+
+Generates matrix for forward Euler iteration.
+"""
 function euler_matrix(A::Matrix{CPType},b::Vector{CPType},h::Real) where CPType
     n = length(b)
     A = CPType(h)*A
@@ -40,6 +67,11 @@ function euler_matrix(A::Matrix{CPType},b::Vector{CPType},h::Real) where CPType
     return A
 end
 
+"""
+    euler_matrix(A::Matrix{CPType},b::Vector{CPType},h::Real) -> Matrix
+
+Updates euler matrix for forward Euler iteration.
+"""
 function euler_matrix_update(A::Matrix{CPType}, b::Vector{CPType}, nrm::Real) where CPType
     n = length(b)
     A = CPType(nrm^2)*A
@@ -65,7 +97,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
     res = Array{eltype(b),2}(undef,len,siz)
     res[1,:] = b
     A = euler_matrix(A,b,dt)
-    H = make_unitary(A)
+    H = make_hermitian(A)
     reg = make_input_vector(b)
     r, N = nonlinear_transform(H,reg,k,ϵ)
     ntem = 1
@@ -74,7 +106,7 @@ function DiffEqBase.solve(prob::QuODEProblem,alg::QuNLDE; dt = (prob.tspan[2]-pr
         res[step,:] = tem[2:siz+1]
         ntem = norm(res[step,:])
         C = euler_matrix_update(A,b,ntem)
-        H = make_unitary(C)
+        H = make_hermitian(C)
         reg = res[step,:]/ntem
         reg = make_input_vector(reg)
         r, N = nonlinear_transform(H,reg,k,ϵ)
