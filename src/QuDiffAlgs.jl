@@ -5,7 +5,7 @@ abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
 
 abstract type LDEMSAlgHHL <: QuODEAlgorithm end
 """
-QuLDE <: QuODEAlgorithm
+    QuLDE <: QuODEAlgorithm
 
 Linear differential equation solvers (non-HHL)
     * k : order of Taylor series expansion
