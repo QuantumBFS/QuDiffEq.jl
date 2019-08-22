@@ -5,6 +5,7 @@ export v,lc
 
 const C(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m)/factorial(m)
 const D(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m-1)*t/factorial(m)
+
 """
 
     TaylorParam(k::Int, t::L, H::Matrix, x::Array{CPType,1})
@@ -22,6 +23,7 @@ Assigns values to parameters required for Taylor series based Hamiltonian simula
     * t : time of evolution
     * prob : wrapper for Linear differential equation problems (contains H, x, b)
 """
+
 struct TaylorParam{CPType, UType, L, HM}
     k::Int # Taylor expansion upto k
     t::L
@@ -67,6 +69,7 @@ struct TaylorParam{CPType, UType, L, HM}
             c = 2
             rs = k
             l = 2
+
         end
         for i in 1:k
             D_tilda = D_tilda + D(i, prob.b, opn,t,c)
@@ -84,11 +87,13 @@ struct TaylorParam{CPType, UType, L, HM}
     end
 end
 
+
 """
     calc_vs1(blk::TaylorParam, x::Vector{CPType}, opn::Real) ->  Matrix{CPType}
 
 Calculates VS1 block for Taylor circuit.
 """
+
 function calc_vs1(blk::TaylorParam, x::Vector{CPType}, opn::Real) where CPType
     k = blk.k
     rs = blk.rs
@@ -196,7 +201,6 @@ j : control bits tuple
 v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) = control(n, j,(1 + c:T + c...,)=>matblock(V))
 lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (k+c+1+(i-1)*l:k+1+c+i*l-1...,))
 
-
 """
     circuit_ends(n::Int, blk::TaylorParam{CPType, true}, VS1::AbstractMatrix, VS2::AbstractMatrix)
 
@@ -225,7 +229,6 @@ function circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatr
     return cir
 end
 
-
 """
     circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatrix, VT::AbstractMatrix)
 
@@ -238,6 +241,7 @@ function circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatr
     end
     return cir
 end
+
 """
     circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, true})
 
@@ -261,6 +265,7 @@ function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, true}) wh
     end
     return cir
 end
+
 """
     circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false})
 
@@ -295,6 +300,7 @@ function taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix)
     circfin =circuit_ends(n,blk,VS1')
     return chain(circinit, circmid, circfin)
 end
+
 """
     taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix, VT::Matrix) ->->  ChainBlock{n}
 
