@@ -238,6 +238,7 @@ function circuit_ends(n::Int, blk::TaylorParam{CPType, false}, VS1::AbstractMatr
     end
     return cir
 end
+
 """
     circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, true})
 
@@ -261,6 +262,7 @@ function circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, true}) wh
     end
     return cir
 end
+
 """
     circuit_intermediate(n::Int, c::Int, blk::TaylorParam{CPType, false})
 
@@ -295,6 +297,7 @@ function taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix)
     circfin =circuit_ends(n,blk,VS1')
     return chain(circinit, circmid, circfin)
 end
+
 """
     taylorcircuit(n::Int, blk::TaylorParam, VS1::Matrix, VT::Matrix) ->->  ChainBlock{n}
 
