@@ -1,4 +1,4 @@
-# Quantum Algorithms for differential equations
+# Quantum Algorithms for Differential Equations
 
 ## Taylor truncation based algorithms
 

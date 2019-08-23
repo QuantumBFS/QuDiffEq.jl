@@ -33,11 +33,13 @@ tspan = (0.0,0.4)
 
 qprob = QuLDEProblem(M,b,x,tspan)
 ```
+
 To solve the problem we use `solve()` after deciding on an algorithm e.g. `alg = QuAB3()` . Here, is an example for `QuLDE`.
 ```@example lin
 alg = QuLDE()
 res = solve(qprob,alg)
 ```
+
 Let's compare the result with a `Tsit5()` from `OrdinaryDiffEq`
 ```@example lin
 f(u,p,t) = M*u + b;
@@ -47,4 +49,5 @@ sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 s = sol.u[end]
 @test isapprox.(s, res, atol = 0.02) |> all
 ```
+
 Note : `QuLDE` works only with constant `M` and `b`. There is no such restriction on the other algorithms.

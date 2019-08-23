@@ -1,4 +1,4 @@
-#Taylor Truncation
+# Taylor Truncation
 
 Taylor truncation based Hamiltonian simulation (https://arxiv.org/abs/1412.4687) has many clear advantages. It has better complexity dependence on the precision and allows a greater range of Hamiltonians to be simulated.
 
