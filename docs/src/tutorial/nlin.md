@@ -59,7 +59,11 @@ using Plots;
 
 plot(sol.t,real.(res),lw = 1,label="QuNLDE()")
 plot!(sol,lw = 3, ls=:dash,label="Euler()")
+savefig("QuNLDE-plot.svg"); nothing # hide
 ```
+
+![](QuNLDE-plot.svg)
+
 - For `QuLDE`, the problem is defined as a `ODEProblem`, similar to that in OrdinaryDiffEq.jl . `f` is the differential equation written symbolically. We can use prob from the previous case itself.
 
 ```@example nonlin
@@ -70,4 +74,6 @@ sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 using Plots
 plot(sol.t,real.(res),lw = 1,label="QuNLDE()")
 plot!(sol,lw = 3, ls=:dash,label="Tsit5()")
+savefig("QuLDE-plot.svg"); nothing # hide
 ```
+![](QuLDE-plot.svg)
