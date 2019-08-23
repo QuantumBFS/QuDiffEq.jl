@@ -2,22 +2,33 @@ export QuLDE, LDEMSAlgHHL, QuNLDE
 export QuEuler, QuLeapfrog, QuAB2, QuAB3, QuAB4
 
 abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
+"""
+    LDEMSAlgHHL <: QuODEAlgorithm
 
+Multi-step methods based on HHL
+
+"""
 abstract type LDEMSAlgHHL <: QuODEAlgorithm end
+
 """
+    QuLDE <: QuODEAlgorithm
+
 Linear differential equation solvers (non-HHL)
+    * k : order of Taylor series expansion
 
-ref : arxiv.org/abs/1807.04553
 """
-
 struct QuLDE <: QuODEAlgorithm
     k::Int
     QuLDE(k = 3) = new(k)
 end
-"""
-Linear differential equation solvers (non-HHL)
 
-ref : arxiv.org/abs/0812.4423
+"""
+    QuNLDE <: QuODEAlgorithm
+
+Linear differential equation solvers (non-HHL)
+    * k : order of Taylor series expansion
+    * ϵ : precision
+
 """
 struct QuNLDE <: QuODEAlgorithm
     k::Int
@@ -26,9 +37,10 @@ struct QuNLDE <: QuODEAlgorithm
 end
 
 """
-Linear differential equation solvers using HHL
+    QuEuler{T} <: LDEMSAlgHHL
 
-ref : arxiv.org/abs/1010.2745v2
+Euler Method using HHL (1-step method)
+
 """
 struct QuEuler{T} <: LDEMSAlgHHL
     step::Int
@@ -38,6 +50,12 @@ struct QuEuler{T} <: LDEMSAlgHHL
     QuEuler(nreg = 12,::Type{T} = Float64) where {T} = new{T}(1,[1.0,],[1.0,],nreg)
 end
 
+"""
+    QuLeapfrog{T} <: LDEMSAlgHHL
+
+Leapfrog Method using HHL (2-step method)
+
+"""
 struct QuLeapfrog{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
@@ -45,6 +63,13 @@ struct QuLeapfrog{T} <: LDEMSAlgHHL
     nreg::Int
     QuLeapfrog(nreg = 12,::Type{T} = Float64) where {T} = new{T}(2,[0, 1.0],[2.0, 0],nreg)
 end
+
+"""
+    QuAB2{T} <: LDEMSAlgHHL
+
+AB2 Method using HHL (2-step method)
+
+"""
 struct QuAB2{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
@@ -52,6 +77,13 @@ struct QuAB2{T} <: LDEMSAlgHHL
     nreg::Int
     QuAB2(nreg = 12,::Type{T} = Float64) where {T} = new{T}(2,[1.0, 0], [1.5, -0.5],nreg)
 end
+
+"""
+    QuAB3{T} <: LDEMSAlgHHL
+
+AB3 Method using HHL (3-step method)
+
+"""
 struct QuAB3{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
@@ -59,6 +91,13 @@ struct QuAB3{T} <: LDEMSAlgHHL
     nreg::Int
     QuAB3(nreg = 12,::Type{T} = Float64) where {T} = new{T}(3,[1.0, 0, 0], [23/12, -16/12, 5/12],nreg)
 end
+
+"""
+    QuAB4{T} <: LDEMSAlgHHL
+
+AB4 Method using HHL (4-step method)
+
+"""
 struct QuAB4{T} <: LDEMSAlgHHL
     step::Int
     α::Vector{T}
