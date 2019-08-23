@@ -2,21 +2,26 @@ export QuLDE, LDEMSAlgHHL, QuNLDE
 export QuEuler, QuLeapfrog, QuAB2, QuAB3, QuAB4
 
 abstract type QuODEAlgorithm <: DiffEqBase.AbstractODEAlgorithm end
-
-abstract type LDEMSAlgHHL <: QuODEAlgorithm end
 """
-QuLDE <: QuODEAlgorithm
+    LDEMSAlgHHL <: QuODEAlgorithm
+
+Multi-step methods based on HHL
+
+"""
+abstract type LDEMSAlgHHL <: QuODEAlgorithm end
+
+"""
+    QuLDE <: QuODEAlgorithm
 
 Linear differential equation solvers (non-HHL)
     * k : order of Taylor series expansion
 
-ref : arxiv.org/abs/1807.04553
 """
-
 struct QuLDE <: QuODEAlgorithm
     k::Int
     QuLDE(k = 3) = new(k)
 end
+
 """
     QuNLDE <: QuODEAlgorithm
 
@@ -24,7 +29,6 @@ Linear differential equation solvers (non-HHL)
     * k : order of Taylor series expansion
     * ϵ : precision
 
-ref : arxiv.org/abs/0812.4423
 """
 struct QuNLDE <: QuODEAlgorithm
     k::Int

@@ -10,6 +10,7 @@ QuDiffEq.QuNLDE
 The following algorithms are in the reference, arxiv.org/abs/1010.2745v2 .
 
 ```@docs
+QuDiffEq.LDEMSAlgHHL
 QuDiffEq.QuEuler
 QuDiffEq.QuLeapfrog
 QuDiffEq.QuAB2

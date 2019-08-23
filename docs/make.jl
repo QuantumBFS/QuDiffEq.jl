@@ -3,7 +3,7 @@ using Documenter, QuDiffEq
 const PAGES = [
     "Home" => "index.md",
     "Tutorial" => ["tutorial/lin.md","tutorial/nlin.md",] ,
-    "Manual" => "man/taylor.md",
+    "Manual" => ["man/algs.md", "man/taylor.md", ]
 ]
 
 makedocs(sitename="QuDiffEq.jl",
