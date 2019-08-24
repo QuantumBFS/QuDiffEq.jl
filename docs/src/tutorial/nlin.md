@@ -5,8 +5,10 @@
 \begin{array}{rcl} \frac{dx}{dt} & = & f_1(x,y) \\ \frac{dy}{dt} &=& f_2(x,y)\end{array}
 ```
 
-`QuDiffEq` has two algorithms for solving non-linear differential equations:
-- `QuNLDE`: Uses function transformation and the forward Euler method. (quadratic differential equations only)
+`QuDiffEq` has two algorithms for solving non-linear differential equations.
+
+## QuNLDE
+Uses function transformation and the forward Euler method. (quadratic differential equations only)
 
 The algorithm makes use of two sub-routines :
 1. A function transformation routine - this is a mapping from ``z = (x,y)`` to a polynomial, ``P(z)`` . The function transformation is done using a Hamiltonian simulation. The *Taylor Truncation method* is used here.
@@ -43,8 +45,8 @@ A |\phi\rangle|\phi\rangle = \sum_{i,k,l = 0}^{n}a_i^{kl}z_k z_l|i⟩|0⟩
 For efficient simulation, the mapping has to be *sparse* in nature. In general, the functions ``f_i``will not be measure preserving i.e. they do not preserve the norm of their arguments. In that case, the operator needs to be adjusted by appropriately multiplying its elements by  ||z|| or ||z||^2.
 
 To actually carry out the simulation, we need to build a hermitian operator containing ``A``. A well-known trick is to write the hamiltonian ``H =−iA\otimes|1⟩⟨0|+iA^† ⊗|0⟩⟨1|`` (this is von Neumann measurement prescription).  is simulated (using Taylor Truncation method). The resulting state is post-selected ``|1\rangle`` on to precisely get the what we are looking for.
-
-- `QuLDE`: Linearises the differential equation at every iteration.
+## QuLDE
+Linearises the differential equation at every iteration.
 
 The system is linearised about the point ``(x^{*},y^{*})``. We obtain the equation,
 ```math
@@ -98,8 +100,10 @@ A[9,7] = ComplexF32(-1);
 
 ```julia
 qprob = QuLDEProblem(A,x,tspan);
+```
 
 To solve the problem we use `solve()`
+
 ```julia
 res = solve(qprob,QuNLDE(), dt = 0.1);
 ```
