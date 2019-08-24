@@ -10,7 +10,7 @@ The package provides circuits for five kinds of problems:
 - Solution by linearising a non-linear differential equation
 
 To simulate the following the algorithm, simulates the Taylor expansion of ``e^{iHt}`` upto ``k`` orders.
-```
+```math
 |u(t)⟩ = e^{iHt}|u(0)⟩
 ```
 We have,
