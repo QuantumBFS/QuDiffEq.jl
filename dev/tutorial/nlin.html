@@ -19,12 +19,11 @@ A[1,1] = ComplexF32(1);
 A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
-A[9,7] = ComplexF32(-1);
-nothing #hide</code></pre><pre><code class="language-julia">qprob = QuLDEProblem(A,x,tspan);
+A[9,7] = ComplexF32(-1);</code></pre><pre><code class="language-julia">qprob = QuLDEProblem(A,x,tspan);
 
 To solve the problem we use `solve()`</code></pre><p>julia res = solve(qprob,QuNLDE(), dt = 0.1);</p><pre><code class="language-none">Comparing the result with `Euler()`
-</code></pre><p>julia eval = false</p><p>function f(du,u,p,t)     du[1] = -3<em>u[1]^2 + u[2]     du[2] = -u[2]^2 - u[1]</em>u[2] end</p><p>prob = ODEProblem(f, x, tspan) sol = solve(prob, Euler(), dt = 0.1, adaptive = false)</p><p>using Plots;</p><p>plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;) plot!(sol,lw = 3, ls=:dash,label=&quot;Euler()&quot;)</p><pre><code class="language-none">
+</code></pre><p>julia</p><p>function f(du,u,p,t)     du[1] = -3<em>u[1]^2 + u[2]     du[2] = -u[2]^2 - u[1]</em>u[2] end</p><p>prob = ODEProblem(f, x, tspan) sol = solve(prob, Euler(), dt = 0.1, adaptive = false)</p><p>using Plots;</p><p>plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;) plot!(sol,lw = 3, ls=:dash,label=&quot;Euler()&quot;)</p><pre><code class="language-none">
 ![](docs/assets/figures/QuNLDE-plot.svg)
 
 - For `QuLDE`, the problem is defined as a `ODEProblem`, similar to that in OrdinaryDiffEq.jl . `f` is the differential equation written symbolically. We can use prob from the previous case itself.
-</code></pre><p>julia res = solve(prob,QuLDE(),dt = 0.1)</p><pre><code class="language-none"></code></pre><p>sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)</p><p>using Plots plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;) plot!(sol,lw = 3, ls=:dash,label=&quot;Tsit5()&quot;) ``` <img src="docs/assets/figures/QuLDE-plot.svg" alt/></p><footer><hr/><a class="previous" href="lin.html"><span class="direction">Previous</span><span class="title">Linear Differential Equations</span></a><a class="next" href="../man/algs.html"><span class="direction">Next</span><span class="title">Quantum Algorithms for Differential Equations</span></a></footer></article></body></html>
+</code></pre><p>julia res = solve(prob,QuLDE(),dt = 0.1)</p><pre><code class="language-none"></code></pre><p>julia sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)</p><p>using Plots plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;) plot!(sol,lw = 3, ls=:dash,label=&quot;Tsit5()&quot;) ``` <img src="docs/assets/figures/QuLDE-plot.svg" alt/></p><footer><hr/><a class="previous" href="lin.html"><span class="direction">Previous</span><span class="title">Linear Differential Equations</span></a><a class="next" href="../man/algs.html"><span class="direction">Next</span><span class="title">Quantum Algorithms for Differential Equations</span></a></footer></article></body></html>
