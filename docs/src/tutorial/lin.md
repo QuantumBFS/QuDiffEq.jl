@@ -26,6 +26,8 @@ The vectors ``x(0)`` and ``b`` are encoded as state - ``|x(0)\rangle = \sum_{i} 
 ```
 To bring about the above transformation, we use the `quldecircuit`.
 
+Note : `QuLDE` works only with constant `M` and `b`. There is no such restriction on the other algorithms.
+
 ## LDEMSAlgHHL
 
  - `QuEuler`
@@ -70,5 +72,3 @@ sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 s = sol.u[end]
 @test isapprox.(s, res, atol = 0.02) |> all
 ```
-
-Note : `QuLDE` works only with constant `M` and `b`. There is no such restriction on the other algorithms.
