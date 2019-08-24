@@ -6,7 +6,8 @@ A linear differential equation is written as
 ```
  `M` is an arbitrary N × N matrix, `x` and `b` are N dimensional vectors.
 
-`QuDiffEq` allows for the following methods of solving a linear differential equation:
+`QuDiffEq` allows for the following methods of solving a linear differential equation.
+## QuLDE
 - `QuLDE`: LDE algorithm based on Taylor Truncation. This method evaluates the vector at the last time step, without going through the intermediate steps, unlike other solvers.
 
  The exact solution for ``x(t)`` is give by -
@@ -25,12 +26,13 @@ The vectors ``x(0)`` and ``b`` are encoded as state - ``|x(0)\rangle = \sum_{i} 
 ```
 To bring about the above transformation, we use the `quldecircuit`.
 
-- `<: LDEMSAlgHHL`: LDE algorithm based on HHL
-  - `QuEuler`
-  - `QuLeapfrog`
-  - `QuAB2`
-  - `QuAB3`
-  - `QuAB4`
+## LDEMSAlgHHL
+
+ - `QuEuler`
+ - `QuLeapfrog`
+ - `QuAB2`
+ - `QuAB3`
+ - `QuAB4`
 
 The HHL algorithm is used for solving a system of linear equations. One can model multistep methods as linear equations, which then can be simulated through HHL.
 
