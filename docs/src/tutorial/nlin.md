@@ -33,15 +33,18 @@ A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
 A[9,7] = ComplexF32(-1);
+nothing #hide
 ```
 
 ```@example nonlin
 qprob = QuLDEProblem(A,x,tspan)
-
+qprob
 ```
+
 To solve the problem we use `solve()`
 ```@example nonlin
 res = solve(qprob,QuNLDE(), dt = 0.1)
+res
 ```
 Comparing the result with `Euler()`
 
