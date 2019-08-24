@@ -14,7 +14,7 @@ Modules = [QuDiffEq]
 Pages  = ["TaylorTrunc.jl",]
 ```
 
-## Quantum linear differential equation solver
+## Linear Differential Equation Solver
 
 A linear differential equation has the form :
 ```math
@@ -41,7 +41,7 @@ Modules = [QuDiffEq]
 Pages  = ["QuLDE.jl"]
 ```
 
-## Quantum non-linear differential equation
+## Non-linear Differential Equation Solver
 
 The non-linear solver constitutes two sub-routines.
 Firstly, the function transform sub-routine, which employs of the `taylorcircuit`. The function transform lets us map ``z`` to ``P(z)``, where ``P`` is a quadratic polynomial.
