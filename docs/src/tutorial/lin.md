@@ -8,12 +8,31 @@ A linear differential equation is written as
 
 `QuDiffEq` allows for the following methods of solving a linear differential equation:
 - `QuLDE`: LDE algorithm based on Taylor Truncation. This method evaluates the vector at the last time step, without going through the intermediate steps, unlike other solvers.
+
+ The exact solution for ``x(t)`` is give by -
+
+```math
+ x(t) = e^{Mt}x(0) + (e^{Mt} - I)M^{-1}b
+```
+This can be Taylor expanded up to the ``k^{th}``order as -
+```math
+x(t) \approx \sum^{k}_{m=0}\frac{(Mt)^{m}}{m!}x(0) + \sum^{k-1}_{n=1}\frac{(Mt)^{n-1}t}{n!}b
+```
+The vectors ``x(0)`` and ``b`` are encoded as state - ``|x(0)\rangle = \sum_{i} \frac{x_{i}}{||x||} |i\rangle`` and ``|b\rangle = \sum_{i} \frac{b_{i}}{||b||} |i\rangle`` with ``\{|i \rangle\}``as the computational basis states. We can also write ``M`` as ``M = ||M||\mathcal{M}``. We then get:
+
+```math
+|x(t)\rangle \approx \sum^{k}_{m=0}\frac{||x(0)||(||M||t)^{m}}{m!}\mathcal{M}^{m}|x(0)\rangle + \sum^{k-1}_{n=1}\frac{||b||(||M||t)^{n-1}t}{n!}\mathcal{M}^{n-1}|b\rangle
+```
+To bring about the above transformation, we use the `quldecircuit`.
+
 - `<: LDEMSAlgHHL`: LDE algorithm based on HHL
   - `QuEuler`
   - `QuLeapfrog`
   - `QuAB2`
   - `QuAB3`
   - `QuAB4`
+
+The HHL algorithm is used for solving a system of linear equations. One can model multistep methods as linear equations, which then can be simulated through HHL.
 
 ## Usage
 
