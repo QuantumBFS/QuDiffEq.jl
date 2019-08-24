@@ -10,8 +10,10 @@ b = normalize!(rand(ComplexF64, siz))
 x = normalize!(rand(ComplexF64, siz))
 tspan = (0.0,0.4)
 
-qprob = QuLDEProblem(M,b,x,tspan)</code></pre><p>To solve the problem we use <code>solve()</code> after deciding on an algorithm e.g. <code>alg = QuAB3()</code> . Here, is an example for <code>QuLDE</code>.</p><pre><code class="language-">alg = QuLDE()
-res = solve(qprob,alg)</code></pre><p>Let&#39;s compare the result with a <code>Tsit5()</code> from <code>OrdinaryDiffEq</code></p><pre><code class="language-">f(u,p,t) = M*u + b;
+qprob = QuLDEProblem(M,b,x,tspan)
+qprob</code></pre><p>To solve the problem we use <code>solve()</code> after deciding on an algorithm e.g. <code>alg = QuAB3()</code> . Here, is an example for <code>QuLDE</code>.</p><pre><code class="language-">alg = QuLDE()
+res = solve(qprob,alg)
+res</code></pre><p>Let&#39;s compare the result with a <code>Tsit5()</code> from <code>OrdinaryDiffEq</code></p><pre><code class="language-">f(u,p,t) = M*u + b;
 prob = ODEProblem(f, x, tspan)
 
 sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
