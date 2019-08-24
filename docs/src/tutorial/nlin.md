@@ -94,7 +94,6 @@ A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
 A[9,7] = ComplexF32(-1);
-nothing #hide
 ```
 
 ```julia
@@ -106,7 +105,7 @@ res = solve(qprob,QuNLDE(), dt = 0.1);
 ```
 Comparing the result with `Euler()`
 
-```julia eval = false
+```julia
 
 function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
@@ -129,7 +128,8 @@ plot!(sol,lw = 3, ls=:dash,label="Euler()")
 ```julia
 res = solve(prob,QuLDE(),dt = 0.1)
 ```
-```
+
+```julia
 sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 
 using Plots
