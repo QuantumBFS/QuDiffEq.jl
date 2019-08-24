@@ -1,9 +1,6 @@
 # QuDiffEq
 
-*A General Purpose Quantum Computation Simulation Framework*
-
 [QuDiffEq](https://github.com/QuantumBFS/QuDiffEq.jl) is a package for solving differential equations using quantum algorithms. It makes use of the Yao.jl, a quantum simulator in Julia.
-
 
 ## Features
 - Quantum algorithms for linear differential equation

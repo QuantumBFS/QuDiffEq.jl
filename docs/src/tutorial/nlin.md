@@ -94,12 +94,12 @@ A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
 A[9,7] = ComplexF32(-1);
+nothing #hide
 ```
 
 ```julia
 qprob = QuLDEProblem(A,x,tspan);
 
-```
 To solve the problem we use `solve()`
 ```julia
 res = solve(qprob,QuNLDE(), dt = 0.1);

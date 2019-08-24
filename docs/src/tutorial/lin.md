@@ -51,12 +51,14 @@ x = normalize!(rand(ComplexF64, siz))
 tspan = (0.0,0.4)
 
 qprob = QuLDEProblem(M,b,x,tspan)
+qprob
 ```
 
 To solve the problem we use `solve()` after deciding on an algorithm e.g. `alg = QuAB3()` . Here, is an example for `QuLDE`.
 ```julia
 alg = QuLDE()
 res = solve(qprob,alg)
+res
 ```
 
 Let's compare the result with a `Tsit5()` from `OrdinaryDiffEq`
