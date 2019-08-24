@@ -125,7 +125,7 @@ plot(sol.t,real.(res),lw = 1,label="QuNLDE()")
 plot!(sol,lw = 3, ls=:dash,label="Euler()")
 ```
 
-![](docs/assets/figures/QuNLDE-plot.svg)
+![](../assets/figures/QuNLDE-plot.svg)
 
 - For `QuLDE`, the problem is defined as a `ODEProblem`, similar to that in OrdinaryDiffEq.jl . `f` is the differential equation written symbolically. We can use prob from the previous case itself.
 
@@ -140,4 +140,4 @@ using Plots
 plot(sol.t,real.(res),lw = 1,label="QuNLDE()")
 plot!(sol,lw = 3, ls=:dash,label="Tsit5()")
 ```
-![](docs/assets/figures/QuLDE-plot.svg)
+![](../assets/figures/QuLDE-plot.svg)
