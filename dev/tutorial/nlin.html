@@ -10,7 +10,7 @@ using OrdinaryDiffEq
 using LinearAlgebra
 
 tspan = (0.0,0.4)
-x = [0.6, 0.8]</code></pre><ul><li>For <code>QuNLDE</code>, we need to define a <code>&lt;: QuODEProblem</code>. At present, we use only <code>QuLDEProblem</code> as a Qu problem wrapper. <code>QuNLDE</code> can solve only quadratic differential equations. <code>A</code> is the coefficient matrix for the quadratic differential equation.</li></ul><pre><code class="language-julia">N = 2 # size of the input vector
+x = [0.6, 0.8];</code></pre><ul><li>For <code>QuNLDE</code>, we need to define a <code>&lt;: QuODEProblem</code>. At present, we use only <code>QuLDEProblem</code> as a Qu problem wrapper. <code>QuNLDE</code> can solve only quadratic differential equations. <code>A</code> is the coefficient matrix for the quadratic differential equation.</li></ul><pre><code class="language-julia">N = 2 # size of the input vector
 siz = nextpow(2, N + 1)
 
 A = zeros(ComplexF32,2^(siz),2^(siz));
@@ -18,7 +18,7 @@ A[1,1] = ComplexF32(1);
 A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
-A[9,7] = ComplexF32(-1);</code></pre><pre><code class="language-">qprob = QuLDEProblem(A,x,tspan);</code></pre><p>To solve the problem we use <code>solve()</code></p><pre><code class="language-">res = solve(qprob,QuNLDE(), dt = 0.1);</code></pre><p>Comparing the result with <code>Euler()</code></p><pre><code class="language-">function f(du,u,p,t)
+A[9,7] = ComplexF32(-1);</code></pre><pre><code class="language-">qprob = QuLDEProblem(A,x,tspan);</code></pre><p>To solve the problem we use <code>solve()</code></p><pre><code class="language-">res = solve(qprob,QuNLDE(), dt = 0.1)</code></pre><p>Comparing the result with <code>Euler()</code></p><pre><code class="language-">function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
     du[2] = -u[2]^2 - u[1]*u[2]
 end
