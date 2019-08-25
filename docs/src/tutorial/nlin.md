@@ -80,7 +80,7 @@ using Random
 using LinearAlgebra
 
 tspan = (0.0,0.4)
-x = [0.6, 0.8]
+x = [0.6, 0.8];
 ```
 
 - For `QuNLDE`, we need to define a `<: QuODEProblem`. At present, we use only `QuLDEProblem` as a Qu problem wrapper.
@@ -105,8 +105,9 @@ qprob = QuLDEProblem(A,x,tspan);
 To solve the problem we use `solve()`
 
 ```@example nlin
-res = solve(qprob,QuNLDE(), dt = 0.1);
+res = solve(qprob,QuNLDE(), dt = 0.1)
 ```
+
 Comparing the result with `Euler()`
 
 ```@example nlin
