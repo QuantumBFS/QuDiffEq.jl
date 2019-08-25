@@ -73,6 +73,7 @@ Let's say we want to solve the following set of differential equations.
 \begin{array}{rcl} \frac{dz_1}{dt} & = & z_2 - 3 z_{1}^{2} \\ \frac{dz_2}{dt}  &=& -z_{2}^{2} - z_1 z_{2} \end{array}
 ```
 Let's take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.
+
 ```@example nlin
 using QuDiffEq
 using OrdinaryDiffEq
@@ -96,6 +97,7 @@ A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
 A[9,7] = ComplexF32(-1);
+nothing # hide
 ```
 
 ```@example nlin
@@ -107,10 +109,10 @@ To solve the problem we use `solve()`
 ```@example nlin
 res = solve(qprob,QuNLDE(), dt = 0.1);
 ```
+
 Comparing the result with `Euler()`
 
 ```@example nlin
-
 function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
     du[2] = -u[2]^2 - u[1]*u[2]
