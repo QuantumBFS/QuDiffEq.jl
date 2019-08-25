@@ -7,7 +7,6 @@
 f_2(x^{*},y^{*})
 \end{pmatrix}\]</div><p>where <span>$\Delta u$</span> is naturally zero. We then have, <span>$\Delta u_{new} = (e^{Jt} - I)J^{-1}b$</span>. This equation is simulated with <code>quldecircuit</code>.</p><h2><a class="nav-anchor" id="Usage-1" href="#Usage-1">Usage</a></h2><p>Let&#39;s say we want to solve the following set of differential equations.</p><div>\[\begin{array}{rcl} \frac{dz_1}{dt} &amp; = &amp; z_2 - 3 z_{1}^{2} \\ \frac{dz_2}{dt}  &amp;=&amp; -z_{2}^{2} - z_1 z_{2} \end{array}\]</div><p>Let&#39;s take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.</p><pre><code class="language-">using QuDiffEq
 using OrdinaryDiffEq
-using Random
 using LinearAlgebra
 
 tspan = (0.0,0.4)
