@@ -42,7 +42,7 @@ The HHL algorithm is used for solving a system of linear equations. One can mode
 
 Firstly, we need to define a `QuLDEProblem` for matrix `M` (may be time dependent), initial vector `x` and vector `b` (may be time dependent). `tspan` is the time interval.
 
-```julia
+```@example lin
 using QuDiffEq
 using OrdinaryDiffEq, Test
 using Random
@@ -58,13 +58,13 @@ qprob = QuLDEProblem(M,b,x,tspan)
 ```
 
 To solve the problem we use `solve()` after deciding on an algorithm e.g. `alg = QuAB3()` . Here, is an example for `QuLDE`.
-```julia
+```@example lin
 alg = QuLDE()
 res = solve(qprob,alg)
 ```
 
 Let's compare the result with a `Tsit5()` from `OrdinaryDiffEq`
-```julia
+```@example lin
 f(u,p,t) = M*u + b;
 prob = ODEProblem(f, x, tspan)
 

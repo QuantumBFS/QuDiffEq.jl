@@ -73,7 +73,7 @@ Let's say we want to solve the following set of differential equations.
 \begin{array}{rcl} \frac{dz_1}{dt} & = & z_2 - 3 z_{1}^{2} \\ \frac{dz_2}{dt}  &=& -z_{2}^{2} - z_1 z_{2} \end{array}
 ```
 Let's take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.
-```julia
+```@example nlin
 using QuDiffEq
 using OrdinaryDiffEq
 using Random
@@ -86,7 +86,7 @@ x = [0.6, 0.8]
 - For `QuNLDE`, we need to define a `<: QuODEProblem`. At present, we use only `QuLDEProblem` as a Qu problem wrapper.
   `QuNLDE` can solve only quadratic differential equations. `A` is the coefficient matrix for the quadratic differential equation.
 
-```julia
+```@example nlin
 N = 2 # size of the input vector
 siz = nextpow(2, N + 1)
 
@@ -98,18 +98,18 @@ A[9,11] = ComplexF32(-1);
 A[9,7] = ComplexF32(-1);
 ```
 
-```julia
+```@example nlin
 qprob = QuLDEProblem(A,x,tspan);
 ```
 
 To solve the problem we use `solve()`
 
-```julia
+```@example nlin
 res = solve(qprob,QuNLDE(), dt = 0.1);
 ```
 Comparing the result with `Euler()`
 
-```julia
+```@example nlin
 
 function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
@@ -129,11 +129,11 @@ plot!(sol,lw = 3, ls=:dash,label="Euler()")
 
 - For `QuLDE`, the problem is defined as a `ODEProblem`, similar to that in OrdinaryDiffEq.jl . `f` is the differential equation written symbolically. We can use prob from the previous case itself.
 
-```julia
+```@example nlin
 res = solve(prob,QuLDE(),dt = 0.1)
 ```
 
-```julia
+```@example nlin
 sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 
 using Plots
