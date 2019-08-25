@@ -161,8 +161,6 @@ function unitary_decompose(H::Array{T,2}) where T
 end
 
 """
-    calc_vt(T)
-
     calc_vt(::Type{CPType}) -> Matrix{CPType}
 
 Generates VT block for non-unitary Taylor circuit.
