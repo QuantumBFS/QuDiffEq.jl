@@ -5,7 +5,7 @@
 \end{pmatrix}\]</div><div>\[b = \begin{pmatrix}
  f_1(x^{*},y^{*})\\
 f_2(x^{*},y^{*})
-\end{pmatrix}\]</div><p>where <span>$\Delta u$</span> is naturally zero. We then have, <span>$\Delta u_{new} = (e^{Jt} - I)J^{-1}b$</span>. This equation is simulated with <code>quldecircuit</code>.</p><h2><a class="nav-anchor" id="Usage-1" href="#Usage-1">Usage</a></h2><p>Let&#39;s say we want to solve the following set of differential equations.</p><div>\[\begin{array}{rcl} \frac{dz_1}{dt} &amp; = &amp; z_2 - 3 z_{1}^{2} \\ \frac{dz_2}{dt}  &amp;=&amp; -z_{2}^{2} - z_1 z_{2} \end{array}\]</div><p>Let&#39;s take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.</p><pre><code class="language-julia">using QuDiffEq
+\end{pmatrix}\]</div><p>where <span>$\Delta u$</span> is naturally zero. We then have, <span>$\Delta u_{new} = (e^{Jt} - I)J^{-1}b$</span>. This equation is simulated with <code>quldecircuit</code>.</p><h2><a class="nav-anchor" id="Usage-1" href="#Usage-1">Usage</a></h2><p>Let&#39;s say we want to solve the following set of differential equations.</p><div>\[\begin{array}{rcl} \frac{dz_1}{dt} &amp; = &amp; z_2 - 3 z_{1}^{2} \\ \frac{dz_2}{dt}  &amp;=&amp; -z_{2}^{2} - z_1 z_{2} \end{array}\]</div><p>Let&#39;s take the time interval to be from 0.0 to 0.4. We define the in initial vector randomly.</p><pre><code class="language-">using QuDiffEq
 using OrdinaryDiffEq
 using Random
 using LinearAlgebra
@@ -19,7 +19,7 @@ A[1,1] = ComplexF32(1);
 A[5,3] = ComplexF32(1);
 A[5,6] = ComplexF32(-3);
 A[9,11] = ComplexF32(-1);
-A[9,7] = ComplexF32(-1);</code></pre><pre><code class="language-julia">qprob = QuLDEProblem(A,x,tspan);</code></pre><p>To solve the problem we use <code>solve()</code></p><pre><code class="language-julia">res = solve(qprob,QuNLDE(), dt = 0.1);</code></pre><p>Comparing the result with <code>Euler()</code></p><pre><code class="language-julia">
+A[9,7] = ComplexF32(-1);</code></pre><pre><code class="language-none">-1.0f0 + 0.0f0im</code></pre><pre><code class="language-">qprob = QuLDEProblem(A,x,tspan);</code></pre><p>To solve the problem we use <code>solve()</code></p><pre><code class="language-">res = solve(qprob,QuNLDE(), dt = 0.1);</code></pre><p>Comparing the result with <code>Euler()</code></p><pre><code class="language-">
 function f(du,u,p,t)
     du[1] = -3*u[1]^2 + u[2]
     du[2] = -u[2]^2 - u[1]*u[2]
@@ -31,7 +31,7 @@ sol = solve(prob, Euler(), dt = 0.1, adaptive = false)
 using Plots;
 
 plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;)
-plot!(sol,lw = 3, ls=:dash,label=&quot;Euler()&quot;)</code></pre><p><img src="../assets/figures/QuNLDE-plot.svg" alt/></p><ul><li>For <code>QuLDE</code>, the problem is defined as a <code>ODEProblem</code>, similar to that in OrdinaryDiffEq.jl . <code>f</code> is the differential equation written symbolically. We can use prob from the previous case itself.</li></ul><pre><code class="language-julia">res = solve(prob,QuLDE(),dt = 0.1)</code></pre><pre><code class="language-julia">sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
+plot!(sol,lw = 3, ls=:dash,label=&quot;Euler()&quot;)</code></pre><p><img src="../assets/figures/QuNLDE-plot.svg" alt/></p><ul><li>For <code>QuLDE</code>, the problem is defined as a <code>ODEProblem</code>, similar to that in OrdinaryDiffEq.jl . <code>f</code> is the differential equation written symbolically. We can use prob from the previous case itself.</li></ul><pre><code class="language-">res = solve(prob,QuLDE(),dt = 0.1)</code></pre><pre><code class="language-">sol = solve(prob, Tsit5(), dt = 0.1, adaptive = false)
 
 using Plots
 plot(sol.t,real.(res),lw = 1,label=&quot;QuNLDE()&quot;)
