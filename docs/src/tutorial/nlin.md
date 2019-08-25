@@ -77,7 +77,6 @@ Let's take the time interval to be from 0.0 to 0.4. We define the in initial vec
 ```@example nlin
 using QuDiffEq
 using OrdinaryDiffEq
-using Random
 using LinearAlgebra
 
 tspan = (0.0,0.4)
