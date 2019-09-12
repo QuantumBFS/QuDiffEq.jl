@@ -3,9 +3,8 @@ using QuDiffEq
 using LinearAlgebra
 using BitBasis
 using OrdinaryDiffEq
-using DiffEqOperators
 using Plots
-
+using Test
 # vertex and egde values
 vertx = 7
 ege = 8
@@ -59,12 +58,7 @@ end
 #Dirichlet
 res1 = do_pde(u1,B,B_t,k,t,a,n)
 
-#Neumann
-#res2 = do_pde(u2,B_t,B,k,t,a,n)
-
-#plot(res1,legend = false)
-
-const Dd = DerivativeOperator{Float64}(2,2,0.1,vertx,:Dirichlet,:Dirichlet)
+const D1 = -1/(a*a)*B*B_t # Laplacian Operator
 function f(du,u,p,t)
     buffer, D = p
     u1 = @view(u[:,1])
@@ -77,13 +71,11 @@ function f(du,u,p,t)
 end
 
 tspan = (0.0,0.1)
-prob1 = ODEProblem(f,u_,tspan,(zero(u_[:,1]), Dd))
+prob1 = ODEProblem(f,u_,tspan,(zero(u_[:,1]), D1))
 sol1 = solve(prob1,Tsit5(),dt=0.01,adaptive = false)
 s1 = Array{Array{Float64,1},1}(undef,n)
 for i in 1:n
     s1[i] = @view (sol1.u[i][:,1])
 end
 
-#plot(s1,legend = false)
-
-plot(res - s,legend = false)
+@test isapprox.(res1,s1, atol = 1e-2) |> all
