@@ -9,18 +9,16 @@ const D(m, x, opn, t, c) = norm(x)*(opn*t*c)^(m-1)*t/factorial(m)
 
     TaylorParam(k::Int, t::L, H::Matrix, x::Array{CPType,1})
 
+    TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T})
+
 Assigns values to parameters required for Taylor series based Hamiltonian simulation.
 
     * k : sets order of Taylor series expansion
     * t : time of evolution
     * H : Hamiltonian
     * x : intial vector
-
-    TaylorParam(k::Int,t::L,prob::QuLDEProblem{uType, tType, isinplace, F, P, T})
-
-    * k : sets order of Taylor series expansion
-    * t : time of evolution
     * prob : wrapper for Linear differential equation problems (contains H, x, b)
+
 """
 struct TaylorParam{CPType, UType, L, HM}
     k::Int # Taylor expansion upto k
