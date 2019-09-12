@@ -22,7 +22,7 @@ pkg> add https://github.com/QuantumBFS/QuDiffEq.jl.git
 - Quantum Algorithms for Linear Differential Equations
   - Based on truncated Taylor series (ref : arxiv.org/abs/1807.04553)
   - Based on HHL (ref : arxiv.org/abs/1010.2745v2)
-
+- Quantum Algorithms for Non Linear Differential Equations (ref : https://arxiv.org/abs/0812.4423)
 
 ## Built With
 
