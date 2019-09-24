@@ -1,4 +1,4 @@
-# v0.1 release note
+# v0.1.0 release note
 
 [QuDiffEq.jl](https://github.com/QuantumBFS/QuDiffEq.jl) was developed as part of JSoC 2019. It allows one to solve differential equations using quantum algorithms.
 We have the following algorithms and example in place:
