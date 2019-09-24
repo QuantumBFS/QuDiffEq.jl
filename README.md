@@ -7,7 +7,7 @@
 Quantum algorithms for solving differential equations.
 
 This project is part of Julia Season of Contribution 2019.
-It is still in the initial development phase.
+For an introduction and overview of the features you can take a look at the blogpost: [#1](https://nextjournal.com/dgan181/julia-soc-19-quantum-algorithms-for-differential-equations/edit), [#2](https://nextjournal.com/dgan181/jsoc-19-non-linear-differential-equation-solver-and-simulating-of-the-wave-equation/edit) 
 
 ## Getting Started
 
@@ -19,10 +19,10 @@ pkg> add https://github.com/QuantumBFS/QuDiffEq.jl.git
 
 ## Algorithms
 
-- Quantum Algorithms for Linear Differential Equations
-  - Based on truncated Taylor series (ref : https://arxiv.org/abs/1807.04553)
-  - Based on HHL (ref : https://arxiv.org/abs/1010.2745v2)
-- Quantum Algorithms for Non Linear Differential Equations (ref : https://arxiv.org/abs/0812.4423)
+- Quantum Algorithms for Linear Differential Equations,
+  - Based on truncated Taylor series
+  - Based on HHL.
+- Quantum Algorithms for Non Linear Differential Equations.
 
 ## Built With
 
@@ -36,3 +36,9 @@ See the list of [contributors](https://github.com/QuantumBFS/QuDiffEq.jl/graphs/
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/QuantumBFS/QuDiffEq.jl/blob/master/LICENSE) file for details
+
+## Reference
+- D. W. Berry. High-order quantum algorithm for solving linear differential equations (https://arxiv.org/abs/1807.04553)
+- Tao Xin et al. A Quantum Algorithm for Solving Linear Differential Equations: Theory and Experiment (https://arxiv.org/abs/1807.04553)
+- Sarah K. Leyton, Tobias J. Osborne. A quantum algorithm to solve nonlinear differential equations (https://arxiv.org/abs/0812.4423)
+- P. C.S. Costa et al. Quantum Algorithm for Simulating the Wave Equation (https://arxiv.org/abs/1711.05394)
