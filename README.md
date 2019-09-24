@@ -39,7 +39,7 @@ See the list of [contributors](https://github.com/QuantumBFS/QuDiffEq.jl/graphs/
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/QuantumBFS/QuDiffEq.jl/blob/master/LICENSE) file for details
 
 ## Reference
-- D. W. Berry. High-order quantum algorithm for solving linear differential equations (https://arxiv.org/abs/1807.04553)
-- Tao Xin et al. A Quantum Algorithm for Solving Linear Differential Equations: Theory and Experiment (https://arxiv.org/abs/1807.04553)
-- Sarah K. Leyton, Tobias J. Osborne. A quantum algorithm to solve nonlinear differential equations (https://arxiv.org/abs/0812.4423)
-- P. C.S. Costa et al. Quantum Algorithm for Simulating the Wave Equation (https://arxiv.org/abs/1711.05394)
+- D. W. Berry. *High-order quantum algorithm for solving linear differential equations* (https://arxiv.org/abs/1807.04553)
+- Tao Xin et al. *A Quantum Algorithm for Solving Linear Differential Equations: Theory and Experiment* (https://arxiv.org/abs/1807.04553)
+- Sarah K. Leyton, Tobias J. Osborne. *A quantum algorithm to solve nonlinear differential equations*(https://arxiv.org/abs/0812.4423)
+- P. C.S. Costa et al. *Quantum Algorithm for Simulating the Wave Equation* (https://arxiv.org/abs/1711.05394)
