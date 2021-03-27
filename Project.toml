@@ -20,10 +20,10 @@ DiffEqBase = "6.7"
 FFTW = "1.1"
 ForwardDiff = "0.10"
 Yao = "0.6"
-YaoBlocks = "0.11"
 YaoArrayRegister = "0.7"
-julia = "1"
+YaoBlocks = "0.11"
 YaoExtensions = "0.2"
+julia = "1"
 
 [extras]
 LuxurySparse = "d05aeea4-b7d4-55ac-b691-9e7fabb07ba2"
