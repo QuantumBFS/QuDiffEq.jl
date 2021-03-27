@@ -1,6 +1,6 @@
 name = "QuDiffEq"
 uuid = "c02438fe-7edc-11e9-0a49-b5c5aafabe04"
-authors = ["Divyanshu Gupta"]
+authors = ["Divyanshu Gupta, Roger Luo and contributors"]
 version = "0.1.0"
 
 [deps]
