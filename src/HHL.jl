@@ -72,7 +72,7 @@ function hhlsolve(A::Matrix, b::Vector, n_reg::Int, C_value::Real)
     UG = matblock(exp(2π*im.*A))
 
     # Generating input bits
-    all_bit =  ArrayReg(b) ⊗ zero_state(n_reg) ⊗ zero_state(1)
+    all_bit =  join(ArrayReg(b), zero_state(n_reg), zero_state(1))
 
     # Construct HHL circuit.
     circuit = hhlcircuit(UG, n_reg, C_value)
