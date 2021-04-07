@@ -321,12 +321,12 @@ function taylorsolve(H::Array{CPType,2}, x::Vector{CPType}, k::Int, t::Real) whe
     l = blk.l
     if rs != k
         n = rs + nbit
-        inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType,rs)
+        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType,rs))
         cir = taylorcircuit(n, blk, VS1)
     else
         n = k*(1 + l) + nbit
         VT = calc_vt(CPType)
-        inreg = ArrayReg(x/norm(x)) ⊗ zero_state(CPType, k*l)  ⊗ zero_state(CPType, k)
+        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType, k*l), zero_state(CPType, k))
         cir = taylorcircuit(n, blk, VS1, VT)
     end
     r = apply!(inreg,cir) |> focus!(1:n - nbit...,) |> select!(0)

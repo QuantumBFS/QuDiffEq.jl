@@ -14,7 +14,7 @@ function make_input_vector(x::Vector{T}) where T
     z[1] = one(T)
     z[2:len+1] = x
     normalize!(z)
-    reg = [1,0] ⊗ z ⊗ z
+    reg = kron([1,0], z, z)
     return reg
 end
 
