@@ -80,15 +80,28 @@ function array_qudiff(g::Function,alg::LDEMSAlgHHL,tspan::NTuple{2, Float64},h::
     return A_
 end
 
+function _array_qudiff(A::AbstractMatrix{T}, alg, tspan, dt) where {T}
+    At(t) = A
+    array_qudiff(alg, tspan, dt) do t At(t) end
+end
+
+_array_qudiff(A::Function, alg, tspan, dt) = array_qudiff(A, alg, tspan, dt)
+
+function _prepare_init_state(b::Vector{T}, alg, tspan, x, dt) where {T}
+    bt(t) = b 
+    prepare_init_state(alg, tspan, x, dt) do t bt(t) end
+end
+
+_prepare_init_state(b::Function, alg, tspan, x, dt) = prepare_init_state(b, alg, tspan, x, dt)
+
 function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P}, alg::LDEMSAlgHHL; dt = (prob.tspan[2]-prob.tspan[1])/100, kwargs...) where {uType,tType,isinplace, F, P}
     A = prob.A
     b = prob.b
     tspan = prob.tspan
     x = prob.u0
     nreg = alg.nreg
-
-    matx = array_qudiff(alg, tspan, dt) do t A(t) end
-    initstate = prepare_init_state(alg, tspan, x, dt) do t b(t) end
+    matx = _array_qudiff(A, alg, tspan, dt)
+    initstate = _prepare_init_state(b, alg, tspan, x, dt) 
     λ = maximum(eigvals(matx))
     C_value = minimum(eigvals(matx) .|> abs)*0.01;
     matx = 1/(λ*2)*matx
