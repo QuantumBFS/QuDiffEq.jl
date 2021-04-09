@@ -1,7 +1,6 @@
 # QuDiffEq
 
-[![Build Status](https://travis-ci.com/QuantumBFS/QuDiffEq.jl.svg?branch=master)](https://travis-ci.com/dgan181/QuDiffEq.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/QuantumBFS/QuDiffEq.jl?svg=true)](https://ci.appveyor.com/project/dgan181/QuDiffEq-jl)
+[![CI](https://github.com/QuantumBFS/QuDiffEq.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/QuantumBFS/QuDiffEq.jl/actions/workflows/CI.yml)
 [![Codecov](https://codecov.io/gh/QuantumBFS/QuDiffEq.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/dgan181/QuDiffEq.jl)
 
 Quantum algorithms for solving differential equations.
@@ -10,12 +9,21 @@ This project is part of Julia's Season of Contribution 2019.
 
 For an introduction to the algorithms and an overview of the features, you can take a look at the blog posts: [#1](https://nextjournal.com/dgan181/julia-soc-19-quantum-algorithms-for-differential-equations/edit), [#2](https://nextjournal.com/dgan181/jsoc-19-non-linear-differential-equation-solver-and-simulating-of-the-wave-equation/edit). 
 
-## Getting Started
+## Installation
 
-To add package:
+<p>
+QuDiffEq is a &nbsp;
+    <a href="https://julialang.org">
+        <img src="https://raw.githubusercontent.com/JuliaLang/julia-logo-graphics/master/images/julia.ico" width="16em">
+        Julia Language
+    </a>
+    &nbsp; package. To install QuDiffEq,
+    please <a href="https://docs.julialang.org/en/v1/manual/getting-started/">open
+    Julia's interactive session (known as REPL)</a> and press <kbd>]</kbd> key in the REPL to use the package mode, then type the following command
+</p>
 
-```
-pkg> add https://github.com/QuantumBFS/QuDiffEq.jl.git
+```julia
+pkg> add QuDiffEq
 ```
 
 ## Algorithms

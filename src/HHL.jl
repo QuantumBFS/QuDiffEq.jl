@@ -23,7 +23,7 @@ end
     a, -b, b, a
 end
 
-function YaoBlocks.apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
+function YaoBlocks._apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
     mask = bmask(hr.ibit)
     step = 1<<(hr.ibit-1)
     step_2 = step*2
@@ -33,7 +33,7 @@ function YaoBlocks.apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
             λ = bfloat(readbit(i-1, hr.cbits...), nbits=nbit-1)
             if λ >= hr.C_value
                 u = hhlrotmat(λ, hr.C_value)
-                u1rows!(state(reg), i, i+step, u...)
+                YaoArrayRegister.u1rows!(state(reg), i, i+step, u...)
             end
         end
     end
@@ -57,7 +57,7 @@ function hhlcircuit(UG, n_reg::Int, C_value::Real)
     n_all = 1 + n_reg + n_b
     pe = PEBlock(UG, n_reg, n_b)
     cr = HHLCRot{n_reg+1}([2:n_reg+1...], 1, C_value)
-    chain(n_all, concentrate(n_all, pe, [2:n_all...,]), concentrate(n_all, cr, [1:(n_reg+1)...,]), concentrate(n_all, pe', [2:n_all...,]))
+    chain(n_all, subroutine(n_all, pe, [2:n_all...,]), subroutine(n_all, cr, [1:(n_reg+1)...,]), subroutine(n_all, pe', [2:n_all...,]))
 end
 
 """
