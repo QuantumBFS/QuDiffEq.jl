@@ -27,26 +27,21 @@ end
     f(u,p,t) = M*u + v;
     prob = ODEProblem(f, x, tspan)
     qprob = QuLDEProblem(A, b, x, tspan)
-    sol = solve(prob, Tsit5(), dt = h, adaptive = :false)
+    sol = solve(prob, Tsit5(), dt = h, adaptive = false)
     s = vcat(sol.u...)
 
     res = solve(qprob, QuEuler(nreg), dt = h)
-    r = res[(N_t + 1)*2 + 2^N - 1: (N_t + 1)*2 + 2^N + N_t - 3] # range of relevant values in the obtained state.
-    @test isapprox.(s, r, atol = 0.5) |> all
+    @test isapprox.(s, res, atol = 0.5) |> all
 
     res = solve(qprob, QuLeapfrog(nreg), dt = h)
-    r = res[(N_t + 1)*2 + 2^N - 1: (N_t + 1)*2 + 2^N + N_t - 3] # range of relevant values in the obtained state.
-    @test isapprox.(s, r, atol = 0.3) |> all
+    @test isapprox.(s, res, atol = 0.3) |> all
 
     res = solve(qprob, QuAB2(nreg), dt = h)
-    r = res[(N_t + 1)*2 + 2^N - 1: (N_t + 1)*2 + 2^N + N_t - 3] # range of relevant values in the obtained state.
-    @test isapprox.(s, r, atol = 0.3) |> all
+    @test isapprox.(s, res, atol = 0.3) |> all
 
     res = solve(qprob, QuAB3(nreg), dt = h)
-    r = res[(N_t + 1)*2 + 2^N - 1: (N_t + 1)*2 + 2^N + N_t - 3] # range of relevant values in the obtained state.
-    @test isapprox.(s, r, atol = 0.3) |> all
+    @test isapprox.(s, res, atol = 0.3) |> all
 
     res = solve(qprob, QuAB4(nreg),dt = h)
-    r = res[(N_t + 1)*2 + 2^N - 1: (N_t + 1)*2 + 2^N + N_t - 3] # range of relevant values in the obtained state.
-    @test isapprox.(s, r, atol = 0.3) |> all
+    @test isapprox.(s, res, atol = 0.3) |> all
 end;
