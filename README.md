@@ -7,7 +7,7 @@ Quantum algorithms for solving differential equations.
 
 This project is part of Julia's Season of Contribution 2019.
 
-For an introduction to the algorithms and an overview of the features, you can take a look at the blog posts: [#1](https://nextjournal.com/dgan181/julia-soc-19-quantum-algorithms-for-differential-equations/edit), [#2](https://nextjournal.com/dgan181/jsoc-19-non-linear-differential-equation-solver-and-simulating-of-the-wave-equation/edit). 
+For an introduction to the algorithms and an overview of the features, you can take a look at the blog posts: [#1](https://nextjournal.com/dgan181/julia-soc-19-quantum-algorithms-for-differential-equations/), [#2](https://nextjournal.com/dgan181/jsoc-19-non-linear-differential-equation-solver-and-simulating-of-the-wave-equation/). 
 
 ## Installation
 
