@@ -52,12 +52,12 @@ function DiffEqBase.solve(prob::QuLDEProblem{uType,tType,isinplace, F, P, false}
     l = blk.l
     if rs !=k
         n = 1 + rs + nbit
-        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType,rs), ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) )) +  join( ArrayReg(b/norm(b)), zero_state(CPType, rs), ((blk.D_tilda/blk.N) * ArrayReg(CPType, bit"1") ))
+        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType,rs), ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) )) +  join( ArrayReg(b/norm(b)), zero_state(CPType, rs), ((blk.D_tilda/blk.N) * product_state(CPType, bit"1") ))
         cir = quldecircuit(n,blk,VS1,VS2)
     else
         n = 1 + k*(1 + l) + nbit
         VT = calc_vt(CPType)
-        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType, k*l), zero_state(CPType, k), ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) ) )+  join(ArrayReg(b/norm(b)), zero_state(CPType, k*l), zero_state(CPType, k), ((blk.D_tilda/blk.N) * ArrayReg(CPType, bit"1") ))
+        inreg = join(ArrayReg(x/norm(x)), zero_state(CPType, k*l), zero_state(CPType, k), ( (blk.C_tilda/blk.N) * zero_state(CPType, 1) ) )+  join(ArrayReg(b/norm(b)), zero_state(CPType, k*l), zero_state(CPType, k), ((blk.D_tilda/blk.N) * product_state(CPType, bit"1") ))
         cir = quldecircuit(n,blk,VS1,VS2,VT)
     end
 

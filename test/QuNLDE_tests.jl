@@ -1,10 +1,10 @@
 using Yao
 using QuDiffEq
 using LinearAlgebra
-using BitBasis
+using Yao.BitBasis
 using Random
 using Test
-using YaoBlocks
+using Yao.YaoBlocks
 using OrdinaryDiffEq
 
 #Linear Diff Equation Unitary M

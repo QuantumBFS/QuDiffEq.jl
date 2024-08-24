@@ -1,12 +1,13 @@
 module QuDiffEq
 
 using Yao
-using YaoBlocks
+using Yao.YaoBlocks
+using Yao.YaoArrayRegister
+using Yao.BitBasis
 using DiffEqBase
-using BitBasis
 using LinearAlgebra
 using ForwardDiff
-using YaoExtensions
+import Yao.YaoArrayRegister: u1rows!
 
 include("QuDiffProblem.jl")
 include("QuDiffAlgs.jl")
@@ -16,4 +17,5 @@ include("HHL.jl")
 include("PhaseEstimation.jl")
 include("QuLDE.jl")
 include("QuNLDE.jl")
+
 end # module

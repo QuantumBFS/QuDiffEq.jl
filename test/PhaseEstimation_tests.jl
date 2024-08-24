@@ -1,5 +1,5 @@
 using Yao
-using BitBasis
+using Yao.BitBasis
 using Test, LinearAlgebra
 using QuDiffEq
 

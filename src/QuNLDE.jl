@@ -36,7 +36,7 @@ function nonlinear_transform(H::Matrix, x::Vector, k::Int, ϵ::Real = 1e-4)
     r, N = taylorsolve(im*H,x,k,ϵ)
     n = log2i(length(x))
     nb = Int((n-1)/2)
-    r = relax!(r) |> focus!(n)|> select!(1) |> focus!(1:nb...,) |> select!(0)
+    r = relax!(r) |> focus!(n)|> select!(1) |> relax! |> focus!(1:nb...,) |> select!(0)
     return r,sqrt(2)*N/ϵ
 end
 

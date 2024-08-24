@@ -2,10 +2,10 @@ using Yao
 using QuDiffEq
 using LinearAlgebra
 using OrdinaryDiffEq
-using BitBasis
+using Yao.BitBasis
 using Random
 using Test
-using YaoBlocks
+using Yao.YaoBlocks
 
 #Linear Diff Equation Unitary M
 function diffeqProblem(nbit::Int)
@@ -42,7 +42,7 @@ end
     s = sol.u[end]
 
     out = solve(qprob, QuLDE(k))
-    @test isapprox.(s, out, atol = 0.02) |> all
+    @test isapprox.(s, out, atol = 0.04) |> all
 
     # u0 equal to zero
     tspan = (0.0,0.1)

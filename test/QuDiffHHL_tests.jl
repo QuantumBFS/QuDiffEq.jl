@@ -1,5 +1,5 @@
 using Yao
-using BitBasis
+using Yao.BitBasis
 using Random
 using Test, LinearAlgebra
 using OrdinaryDiffEq

@@ -1,7 +1,8 @@
 using Yao
-using BitBasis
+using Yao.BitBasis
 using QuDiffEq
 using Test, LinearAlgebra
+using Random
 
 function crot(n_reg::Int, C_value::Real)
     n_rot = n_reg + 1
@@ -29,7 +30,7 @@ function crot(n_reg::Int, C_value::Real)
 end
 
 @testset "HHLCRot" begin
-    hr = HHLCRot{4}([4,3,2], 1, 0.01)
+    hr = HHLCRot(4,(4,3,2), 1, 0.01)
     reg = rand_state(4)
     @test reg |> copy |> hr |> isnormalized
 
@@ -65,7 +66,6 @@ end
     ## signs: Diagonal Matrix of eigen values of A.
     ## base_space: the eigen space of A.
     ## x: |x>.
-    using Random
     Random.seed!(2)
     N = 3
     A, b = hhl_problem(N)

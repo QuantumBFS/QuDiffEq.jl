@@ -1,21 +1,22 @@
 export hhlcircuit, hhlproject!, hhlsolve, HHLCRot
-import YaoArrayRegister.u1rows!
 
 """
-    HHLCRot{N, NC} <: PrimitiveBlock{N}
+    HHLCRot{NC, T} <: PrimitiveBlock{2}
 
 Controlled rotation gate used in HHL algorithm, applied on N qubits.
 
+    * nqubits: number of qubits.
     * cbits: control bits.
     * ibit:: the ancilla bit.
     * C_value:: the value of constant "C", should be smaller than the spectrum "gap".
 """
-struct HHLCRot{N, NC, T} <: PrimitiveBlock{N}
-    cbits::Vector{Int}
+struct HHLCRot{NC, T} <: PrimitiveBlock{2}
+    nqubits::Int
+    cbits::NTuple{NC, Int}
     ibit::Int
     C_value::T
-    HHLCRot{N}(cbits::Vector{Int}, ibit::Int, C_value::T) where {N, T} = new{N, length(cbits), T}(cbits, ibit, C_value)
 end
+Yao.nqudits(b::HHLCRot) = b.nqubits
 
 @inline function hhlrotmat(λ::Real, C_value::Real)
     b = C_value/λ
@@ -23,8 +24,7 @@ end
     a, -b, b, a
 end
 
-function YaoBlocks._apply!(reg::ArrayReg, hr::HHLCRot{N, NC, T}) where {N, NC, T}
-    mask = bmask(hr.ibit)
+function YaoBlocks.unsafe_apply!(reg::ArrayReg, hr::HHLCRot{NC, T}) where {NC, T}
     step = 1<<(hr.ibit-1)
     step_2 = step*2
     nbit = nqubits(reg)
@@ -56,7 +56,7 @@ function hhlcircuit(UG, n_reg::Int, C_value::Real)
     n_b = nqubits(UG)
     n_all = 1 + n_reg + n_b
     pe = PEBlock(UG, n_reg, n_b)
-    cr = HHLCRot{n_reg+1}([2:n_reg+1...], 1, C_value)
+    cr = HHLCRot(n_reg+1, (2:n_reg+1...,), 1, C_value)
     chain(n_all, subroutine(n_all, pe, [2:n_all...,]), subroutine(n_all, cr, [1:(n_reg+1)...,]), subroutine(n_all, pe', [2:n_all...,]))
 end
 
