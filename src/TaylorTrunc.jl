@@ -178,7 +178,7 @@ n : total number of qubits
 V : T input matrix
 c : starting qubit
 """
-v(n::Int,c::Int, T::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (c + 1:T + c...,))
+v(n::Int,c::Int, T::Int, V::AbstractMatrix) = subroutine(n, matblock(V), (c + 1:T + c...,))
 
 """
     v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) -> ControlBlock{n}
@@ -190,7 +190,7 @@ c : starting qubit
 j : control bits tuple
 """
 v(n::Int,c::Int, j::Tuple, T::Int, V::AbstractMatrix) = control(n, j,(1 + c:T + c...,)=>matblock(V))
-lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = concentrate(n, matblock(V), (k+c+1+(i-1)*l:k+1+c+i*l-1...,))
+lc(n::Int,c::Int, i::Int, k::Int,l::Int, V::AbstractMatrix) = subroutine(n, matblock(V), (k+c+1+(i-1)*l:k+1+c+i*l-1...,))
 
 
 """
